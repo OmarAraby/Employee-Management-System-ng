@@ -1,0 +1,122 @@
+<!-- login.component.html -->
+<div class="login-container">
+  <div class="login-card">
+    <!-- Illustration Section -->
+    <div class="login-illustration">
+      <i class="fas fa-building"></i>
+      <h3>Employee Management</h3>
+      <p>Streamline your workforce management with our comprehensive solution</p>
+    </div>
+
+    <!-- Login Form Section -->
+    <div class="login-form-section">
+      <!-- Header -->
+      <div class="login-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to continue to your dashboard</p>
+      </div>
+  
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-envelope"></i>
+            </span>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              formControlName="email"
+              placeholder="Enter your email"
+              [class.is-invalid]="submitted && f['email'].errors">
+          </div>
+          <div class="invalid-feedback">
+            @if (submitted && f['email'].errors) {
+              @if (f['email'].errors['required']) {
+                <div>Email is required</div>
+              }
+              @if (f['email'].errors['email']) {
+                <div>Please enter a valid email</div>
+              }
+            }
+          </div>
+        </div>
+  
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-lock"></i>
+            </span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              class="form-control"
+              formControlName="password"
+              placeholder="Enter your password"
+              [class.is-invalid]="submitted && f['password'].errors">
+            <button
+              type="button"
+              class="btn btn-outline-secondary password-toggle"
+              (click)="togglePasswordVisibility()">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">
+            @if (submitted && f['password'].errors) {
+              @if (f['password'].errors['required']) {
+                <div>Password is required</div>
+              }
+              @if (f['password'].errors['minlength']) {
+                <div>Password must be at least 6 characters</div>
+              }
+            }
+          </div>
+        </div>
+  
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn btn-login"
+          [disabled]="loading$ | async">
+          @if (loading$ | async) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          @if (!(loading$ | async)) {
+            <i class="fas fa-sign-in-alt me-2"></i>
+          }
+          Sign In
+        </button>
+      </form>
+  
+      <!-- Footer -->
+      <div class="login-footer">
+        <div class="demo-credentials">
+          <h6>Demo Credentials:</h6>
+          <div class="row">
+            <div class="col-6">
+              <small>
+                <strong>Admin:</strong><br>
+                admin&#64;company.com<br>
+                password123
+              </small>
+            </div>
+            <div class="col-6">
+              <small>
+                <strong>Employee:</strong><br>
+                employee&#64;company.com<br>
+                password123
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+ 

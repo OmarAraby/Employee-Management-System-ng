@@ -1,0 +1,214 @@
+<!-- employee-list.component.html -->
+<div class="employee-list-container">
+  <div class="page-header">
+    <h2>Employee Management</h2>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="addEmployee()">
+        <i class="fas fa-plus me-2"></i>Add Employee
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filter-section">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="fas fa-search"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control"
+            placeholder="Search by name, email, or ID..."
+            [(ngModel)]="queryParams.searchTerm"
+            (keyup.enter)="onSearch()">
+        </div>
+      </div>
+      
+      <div class="col-md-2">
+        <label class="form-label">Sort By</label>
+        <select class="form-select" [(ngModel)]="queryParams.sortBy" (change)="onSortChange()">
+          @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Per Page</label>
+        <select class="form-select" [(ngModel)]="queryParams.pageSize" (change)="onPageSizeChange()">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Status</label>
+        <select class="form-select" [(ngModel)]="queryParams.status" (change)="onFilterChange()">
+          @for (status of statusOptions; track status.value) {
+            <option [value]="status.value">
+              {{ status.label }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <div class="filter-toggle">
+          <button class="btn btn-outline-secondary" (click)="toggleFilters()">
+            <i class="fas fa-filter me-2"></i>More Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (showFilters) {
+      <div class="advanced-filters">
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Minimum Age</label>
+            <input 
+              type="number" 
+              class="form-control"
+              placeholder="Minimum age"
+              [(ngModel)]="queryParams.minAge"
+              (change)="onFilterChange()">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Maximum Age</label>
+            <input 
+              type="number" 
+              class="form-control"
+              placeholder="Maximum age"
+              [(ngModel)]="queryParams.maxAge"
+              (change)="onFilterChange()">
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Results Info -->
+  @if (paginatedResult) {
+    <div class="results-info">
+      <span class="text-muted">
+        Showing {{ ((paginatedResult.pageNumber - 1) * paginatedResult.pageSize) + 1 }} 
+        to {{ Math.min(paginatedResult.pageNumber * paginatedResult.pageSize, paginatedResult.totalCount) }}
+        of {{ paginatedResult.totalCount }} employees
+      </span>
+    </div>
+  }
+
+  <!-- Employee Table -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>
+            <input 
+              type="checkbox" 
+              class="form-check-input" 
+              [checked]="selectAll" 
+              (change)="toggleSelectAll()">
+          </th>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (employee of employees; track employee.id) {
+          <tr>
+            <td>
+              <input 
+                type="checkbox" 
+                class="form-check-input" 
+                [checked]="isEmployeeSelected(employee.id)"
+                (change)="toggleEmployeeSelection(employee.id)">
+            </td>
+            <td>{{ employee.employeeId }}</td>
+            <td>
+              <div class="employee-info">
+                <div class="avatar">
+                  {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
+                </div>
+                {{ employee.firstName }} {{ employee.lastName }}
+              </div>
+            </td>
+            <td>{{ employee.email }}</td>
+            <td>{{ employee.department }}</td>
+            <td>
+              <span [class]="getStatusBadgeClass(employee.status)">
+                {{ employee.status }}
+              </span>
+            </td>
+            <td>
+              <div class="btn-group" role="group">
+                <button 
+                  class="btn btn-sm btn-outline-info" 
+                  (click)="viewEmployee(employee.id)"
+                  title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button 
+                  class="btn btn-sm btn-outline-primary" 
+                  (click)="editEmployee(employee.id)"
+                  title="Edit Employee">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button 
+                  class="btn btn-sm btn-outline-danger" 
+                  (click)="deleteEmployee(employee.id, employee.fullName)"
+                  title="Delete Employee">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (paginatedResult && paginatedResult.totalPages > 1) {
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="!paginatedResult.hasPreviousPage">
+          <a class="page-link" (click)="onPageChange(paginatedResult.pageNumber - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+
+        @for (page of getPaginationPages(); track page) {
+          <li 
+            class="page-item" 
+            [class.active]="page === paginatedResult.pageNumber">
+            <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+          </li>
+        }
+        
+        @if (paginatedResult.pageNumber < paginatedResult.totalPages - 2) {
+          <li class="page-item">
+            <a class="page-link" (click)="onPageChange(paginatedResult.totalPages)">
+              {{ paginatedResult.totalPages }}
+            </a>
+          </li>
+        }
+        
+        <li class="page-item" [class.disabled]="!paginatedResult.hasNextPage">
+          <a class="page-link" (click)="onPageChange(paginatedResult.pageNumber + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  }
+</div>
