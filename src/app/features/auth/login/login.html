@@ -4,7 +4,7 @@
     <!-- Illustration Section -->
     <div class="login-illustration">
       <i class="fas fa-building"></i>
-      <h3>Employee Management</h3>
+      <h3>Employee Management System </h3>
       <p>Streamline your workforce management with our comprehensive solution</p>
     </div>
 
@@ -31,10 +31,10 @@
               class="form-control"
               formControlName="email"
               placeholder="Enter your email"
-              [class.is-invalid]="submitted && f['email'].errors">
+              [class.is-invalid]="(submitted || f['email'].touched) && f['email'].errors">
           </div>
           <div class="invalid-feedback">
-            @if (submitted && f['email'].errors) {
+            @if ((submitted || f['email'].touched) && f['email'].errors) {
               @if (f['email'].errors['required']) {
                 <div>Email is required</div>
               }
@@ -58,7 +58,7 @@
               class="form-control"
               formControlName="password"
               placeholder="Enter your password"
-              [class.is-invalid]="submitted && f['password'].errors">
+              [class.is-invalid]="(submitted || f['password'].touched) && f['password'].errors">
             <button
               type="button"
               class="btn btn-outline-secondary password-toggle"
@@ -67,7 +67,7 @@
             </button>
           </div>
           <div class="invalid-feedback">
-            @if (submitted && f['password'].errors) {
+            @if ((submitted || f['password'].touched) && f['password'].errors) {
               @if (f['password'].errors['required']) {
                 <div>Password is required</div>
               }
@@ -93,28 +93,7 @@
         </button>
       </form>
   
-      <!-- Footer -->
-      <div class="login-footer">
-        <div class="demo-credentials">
-          <h6>Demo Credentials:</h6>
-          <div class="row">
-            <div class="col-6">
-              <small>
-                <strong>Admin:</strong><br>
-                admin&#64;company.com<br>
-                password123
-              </small>
-            </div>
-            <div class="col-6">
-              <small>
-                <strong>Employee:</strong><br>
-                employee&#64;company.com<br>
-                password123
-              </small>
-            </div>
-          </div>
-        </div>
-      </div>
+   
     </div>
   </div>
 </div>

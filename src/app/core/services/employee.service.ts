@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, throwError, map, of } from 'rxjs';
 import { CreateEmployeeDto, EmployeeDto, EmployeeListDto, EmployeeStatsDto } from '../models/employee.model';
 import { APIResult, PaginatedResult } from '../models/api-result.model';
 import { EmployeeQueryParams } from '../models/query-params.model';
@@ -13,9 +13,20 @@ export class EmployeeService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = `${environment.apiUrl}/employee`;
 
-  addEmployee(createDto: CreateEmployeeDto): Observable<APIResult<EmployeeDto>> {
-    return this.http.post<APIResult<EmployeeDto>>(this.API_URL, createDto)
-      .pipe(catchError(this.handleError));
+  addEmployee(employee: CreateEmployeeDto): Observable<APIResult<EmployeeDto>> {
+    console.log('Sending employee data:', JSON.stringify(employee, null, 2));
+    
+    return this.http.post<APIResult<EmployeeDto>>(this.API_URL, employee, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).pipe(
+      map(response => {
+        console.log('Add employee response:', response);
+        return response;
+      }),
+      catchError(this.handleError)
+    );
   }
 
   updateEmployee(id: string, updateDto: EmployeeDto): Observable<APIResult<EmployeeDto>> {
@@ -49,13 +60,22 @@ export class EmployeeService {
       .pipe(catchError(this.handleError));
   }
 
-  getEmployeeStats(): Observable<APIResult<EmployeeStatsDto>> {
-    return this.http.get<APIResult<EmployeeStatsDto>>(`${this.API_URL}/stats`)
-      .pipe(catchError(this.handleError));
-  }
+  // getEmployeeStats(): Observable<APIResult<EmployeeStatsDto>> {
+  //   return this.http.get<APIResult<EmployeeStatsDto>>(`${this.API_URL}/stats`)
+  //     .pipe(catchError(this.handleError));
+  // }
 
   private handleError(error: any): Observable<never> {
     console.error('Employee Service Error:', error);
+    
+    // Log detailed error information
+    if (error.error) {
+      console.error('Error details:', error.error);
+      if (error.error.errors) {
+        console.error('Validation errors:', error.error.errors);
+      }
+    }
+    
     return throwError(() => error);
   }
 }

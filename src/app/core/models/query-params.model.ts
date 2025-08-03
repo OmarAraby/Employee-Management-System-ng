@@ -11,6 +11,8 @@ export interface BaseQueryParams {
     status?: string;
     minAge?: number;
     maxAge?: number;
+    startDate?: Date;
+    endDate?: Date;
   }
   
   export interface AttendanceQueryParams extends BaseQueryParams {

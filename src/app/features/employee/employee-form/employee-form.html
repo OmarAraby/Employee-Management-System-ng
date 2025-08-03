@@ -1,276 +1,292 @@
-<!-- employee-form.component.html -->
+<!-- Modern Employee Form Template -->
 <div class="employee-form-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="d-flex align-items-center">
-        <button class="btn btn-outline-secondary me-3" (click)="cancel()">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div>
-          <h2 class="page-title">
-            <i class="fas fa-user-plus me-2" *ngIf="!isEditMode"></i>
-            <i class="fas fa-user-edit me-2" *ngIf="isEditMode"></i>
-            {{ pageTitle }}
-          </h2>
-          <p class="text-muted mb-0">{{ isEditMode ? 'Update employee information' : 'Add a new employee to the system' }}</p>
-        </div>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="d-flex align-items-center">
+    
+      <div>
+        <h1 class="page-title">
+          <i class="fas fa-user-plus" *ngIf="!isEditMode"></i>
+          <i class="fas fa-user-edit" *ngIf="isEditMode"></i>
+          {{ pageTitle }}
+        </h1>
+        <p class="text-muted mb-0">
+          {{ isEditMode ? 'Update employee information and manage their profile' : 'Create a new employee profile with comprehensive details' }}
+        </p>
       </div>
     </div>
-  
-    <!-- Form Card -->
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="card">
-          <div class="card-body">
-            <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+  </div>
+
+  <!-- Main Form Card -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Personal Information Section -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i class="fas fa-user"></i>
+                Personal Information
+              </h2>
               
-              <!-- Personal Information Section -->
-              <div class="form-section">
-                <h5 class="section-title">
-                  <i class="fas fa-user me-2"></i>
-                  Personal Information
-                </h5>
-                
-                <div class="row">
-                  <!-- First Name -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="firstName" class="form-label required">First Name</label>
-                      <input
-                        type="text"
-                        id="firstName"
-                        class="form-control"
-                        formControlName="firstName"
-                        placeholder="Enter first name"
-                        [class.is-invalid]="isFieldInvalid('firstName')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName')">
-                        {{ getFieldError('firstName') }}
-                      </div>
-                    </div>
-                  </div>
-  
-                  <!-- Last Name -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="lastName" class="form-label required">Last Name</label>
-                      <input
-                        type="text"
-                        id="lastName"
-                        class="form-control"
-                        formControlName="lastName"
-                        placeholder="Enter last name"
-                        [class.is-invalid]="isFieldInvalid('lastName')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName')">
-                        {{ getFieldError('lastName') }}
-                      </div>
-                    </div>
-                  </div>
-  
-                  <!-- National ID -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="nationalId" class="form-label required">National ID</label>
-                      <input
-                        type="text"
-                        id="nationalId"
-                        class="form-control"
-                        formControlName="nationalId"
-                        placeholder="Enter national ID (10-14 digits)"
-                        [class.is-invalid]="isFieldInvalid('nationalId')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('nationalId')">
-                        {{ getFieldError('nationalId') }}
-                      </div>
-                    </div>
-                  </div>
-  
-                  <!-- Age -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="age" class="form-label required">Age</label>
-                      <input
-                        type="number"
-                        id="age"
-                        class="form-control"
-                        formControlName="age"
-                        placeholder="Enter age (18-65)"
-                        min="18"
-                        max="65"
-                        [class.is-invalid]="isFieldInvalid('age')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('age')">
-                        {{ getFieldError('age') }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              <!-- Contact Information Section -->
-              <div class="form-section">
-                <h5 class="section-title">
-                  <i class="fas fa-address-book me-2"></i>
-                  Contact Information
-                </h5>
-                
-                <div class="row">
-                  <!-- Phone Number -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="phoneNumber" class="form-label required">Phone Number</label>
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        class="form-control"
-                        formControlName="phoneNumber"
-                        placeholder="Enter phone number"
-                        [class.is-invalid]="isFieldInvalid('phoneNumber')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNumber')">
-                        {{ getFieldError('phoneNumber') }}
-                      </div>
-                    </div>
-                  </div>
-  
-                  <!-- Email -->
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="email" class="form-label">Email (Optional)</label>
-                      <input
-                        type="email"
-                        id="email"
-                        class="form-control"
-                        formControlName="email"
-                        placeholder="Enter email address"
-                        [class.is-invalid]="isFieldInvalid('email')">
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">
-                        {{ getFieldError('email') }}
-                      </div>
-                    </div>
-                  </div>
-  
-                  <!-- Status -->
-                  <div class="col-md-6" *ngIf="isEditMode">
-                    <div class="form-group">
-                      <label for="status" class="form-label required">Status</label>
-                      <select
-                        id="status"
-                        class="form-select"
-                        formControlName="status"
-                        [class.is-invalid]="isFieldInvalid('status')">
-                        <option *ngFor="let option of getStatusOptions()" [value]="option.value">
-                          {{ option.label }}
-                        </option>
-                      </select>
-                      <div class="invalid-feedback" *ngIf="isFieldInvalid('status')">
-                        {{ getFieldError('status') }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              <!-- Signature Section -->
-              <div class="form-section">
-                <h5 class="section-title">
-                  <i class="fas fa-signature me-2"></i>
-                  Signature (Optional)
-                </h5>
-                
-                <div class="signature-upload">
-                  <!-- Current Signature Preview -->
-                  <div class="signature-preview" *ngIf="signaturePreview">
-                    <div class="preview-header">
-                      <span class="text-muted">Current Signature:</span>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        (click)="removeSignature()">
-                        <i class="fas fa-times me-1"></i>
-                        Remove
-                      </button>
-                    </div>
-                    <div class="preview-image">
-                      <img [src]="signaturePreview" alt="Signature Preview" class="img-fluid">
-                    </div>
-                  </div>
-  
-                  <!-- File Upload -->
-                  <div class="file-upload" *ngIf="!signaturePreview">
+              <div class="row">
+                <!-- First Name -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="firstName" class="form-label required">First Name</label>
                     <input
-                      type="file"
-                      id="signatureFile"
-                      class="file-input"
-                      accept="image/*"
-                      (change)="onFileSelected($event)">
-                    <label for="signatureFile" class="file-label">
-                      <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                      </div>
-                      <div class="upload-text">
-                        <strong>Click to upload signature</strong>
-                        <span>or drag and drop</span>
-                      </div>
-                      <div class="upload-hint">
-                        PNG, JPG, GIF up to 5MB
-                      </div>
-                    </label>
+                      type="text"
+                      id="firstName"
+                      class="form-control"
+                      formControlName="firstName"
+                      placeholder="Enter first name"
+                      [class.is-invalid]="isFieldInvalid('firstName')"
+                      autocomplete="given-name">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName')">
+                      {{ getFieldError('firstName') }}
+                    </div>
                   </div>
-  
-                  <!-- Replace File Button -->
-                  <div class="replace-file" *ngIf="signaturePreview">
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="lastName" class="form-label required">Last Name</label>
                     <input
-                      type="file"
-                      id="replaceSignatureFile"
-                      class="file-input"
-                      accept="image/*"
-                      (change)="onFileSelected($event)">
-                    <label for="replaceSignatureFile" class="btn btn-outline-primary">
-                      <i class="fas fa-sync-alt me-2"></i>
-                      Replace Signature
-                    </label>
+                      type="text"
+                      id="lastName"
+                      class="form-control"
+                      formControlName="lastName"
+                      placeholder="Enter last name"
+                      [class.is-invalid]="isFieldInvalid('lastName')"
+                      autocomplete="family-name">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName')">
+                      {{ getFieldError('lastName') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- National ID -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="nationalId" class="form-label required">National ID</label>
+                    <input
+                      type="text"
+                      id="nationalId"
+                      class="form-control"
+                      formControlName="nationalId"
+                      placeholder="Enter national ID (10-14 digits)"
+                      [class.is-invalid]="isFieldInvalid('nationalId')"
+                      maxlength="14">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('nationalId')">
+                      {{ getFieldError('nationalId') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="age" class="form-label required">Age</label>
+                    <input
+                      type="number"
+                      id="age"
+                      class="form-control"
+                      formControlName="age"
+                      placeholder="Enter age (18-65)"
+                      min="18"
+                      max="65"
+                      [class.is-invalid]="isFieldInvalid('age')">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('age')">
+                      {{ getFieldError('age') }}
+                    </div>
                   </div>
                 </div>
               </div>
-  
-              <!-- Form Actions -->
-              <div class="form-actions">
-                <div class="d-flex justify-content-between">
-                  <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    (click)="cancel()">
-                    <i class="fas fa-times me-2"></i>
-                    Cancel
-                  </button>
-                  
-                  <div class="d-flex gap-2">
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i class="fas fa-address-book"></i>
+                Contact Information
+              </h2>
+              
+              <div class="row">
+                <!-- Phone Number -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="phoneNumber" class="form-label required">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      class="form-control"
+                      formControlName="phoneNumber"
+                      placeholder="Enter phone number"
+                      [class.is-invalid]="isFieldInvalid('phoneNumber')"
+                      autocomplete="tel">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNumber')">
+                      {{ getFieldError('phoneNumber') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input
+                      type="email"
+                      id="email"
+                      class="form-control"
+                      formControlName="email"
+                      placeholder="Enter email address (optional)"
+                      [class.is-invalid]="isFieldInvalid('email')"
+                      autocomplete="email">
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">
+                      {{ getFieldError('email') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status (Edit Mode Only) -->
+                <div class="col-md-6" *ngIf="isEditMode">
+                  <div class="form-group">
+                    <label for="status" class="form-label required">Employee Status</label>
+                    <select
+                      id="status"
+                      class="form-select"
+                      formControlName="status"
+                      [class.is-invalid]="isFieldInvalid('status')">
+                      <option value="" disabled>Select status</option>
+                      <option *ngFor="let option of getStatusOptions()" [value]="option.value">
+                        {{ option.label }}
+                      </option>
+                    </select>
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('status')">
+                      {{ getFieldError('status') }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Digital Signature Section -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i class="fas fa-signature"></i>
+                Digital Signature
+              </h2>
+              
+              <div class="signature-upload">
+                <!-- Current Signature Preview -->
+                <div class="signature-preview" *ngIf="signaturePreview">
+                  <div class="preview-header">
+                    <span class="text-muted">
+                      <i class="fas fa-check-circle me-2" style="color: var(--success);"></i>
+                      Signature uploaded successfully
+                    </span>
                     <button
                       type="button"
-                      class="btn btn-outline-primary"
-                      *ngIf="isEditMode"
-                      (click)="cancel()">
-                      <i class="fas fa-eye me-2"></i>
-                      View Details
-                    </button>
-                    
-                    <button
-                      type="submit"
-                      class="btn btn-primary"
-                      [disabled]="loading$ | async">
-                      <span *ngIf="loading$ | async" class="spinner-border spinner-border-sm me-2"></span>
-                      <i *ngIf="!(loading$ | async)" [class]="isEditMode ? 'fas fa-save me-2' : 'fas fa-plus me-2'"></i>
-                      {{ isEditMode ? 'Update Employee' : 'Create Employee' }}
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeSignature()"
+                      title="Remove signature">
+                      <i class="fas fa-trash"></i>
+                      Remove
                     </button>
                   </div>
+                  <div class="preview-image">
+                    <img [src]="signaturePreview" alt="Employee Signature" class="img-fluid">
+                  </div>
+                </div>
+
+                <!-- File Upload Area -->
+                <div class="file-upload" *ngIf="!signaturePreview">
+                  <input
+                    type="file"
+                    id="signatureFile"
+                    class="file-input"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
+                    (change)="onFileSelected($event)">
+                  <label for="signatureFile" class="file-label">
+                    <div class="upload-icon">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">
+                      <strong>Upload Digital Signature</strong>
+                      <span>Drag and drop or click to browse</span>
+                    </div>
+                    <div class="upload-hint">
+                      Supported formats: PNG, JPG, GIF • Max size: 5MB
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Replace Signature Option -->
+                <div class="replace-file" *ngIf="signaturePreview">
+                  <input
+                    type="file"
+                    id="replaceSignatureFile"
+                    class="file-input"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
+                    (change)="onFileSelected($event)">
+                  <label for="replaceSignatureFile" class="btn btn-outline-primary">
+                    <i class="fas fa-sync-alt"></i>
+                    Replace Signature
+                  </label>
                 </div>
               </div>
-  
-            </form>
-          </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <div class="d-flex justify-content-between">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="cancel()">
+                  <i class="fas fa-times"></i>
+                  Cancel
+                </button>
+                
+                <div class="d-flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    *ngIf="isEditMode"
+                    (click)="viewEmployeeDetails()">
+                    <i class="fas fa-eye"></i>
+                    View Profile
+                  </button>
+                  
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="loading$ | async">
+                    <span 
+                      *ngIf="loading$ | async" 
+                      class="spinner-border spinner-border-sm">
+                    </span>
+                    <i 
+                      *ngIf="!(loading$ | async)" 
+                      [class]="isEditMode ? 'fas fa-save' : 'fas fa-plus'">
+                    </i>
+                    {{ isEditMode ? 'Update Employee' : 'Create Employee' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </form>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" *ngIf="loading$ | async">
-    <div class="loading-spinner"></div>
-  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="loading$ | async">
+  <div class="loading-spinner"></div>
+</div>

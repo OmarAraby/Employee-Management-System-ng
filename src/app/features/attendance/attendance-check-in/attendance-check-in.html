@@ -1,0 +1,104 @@
+<div class="check-in-container">
+  <div class="page-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <h1 class="page-title">Attendance Check-In</h1>
+    </div>
+  </div>
+
+  <!-- Clock Card -->
+  <div class="card clock-card mb-4">
+    <div class="card-body">
+      <div class="clock-container">
+        <div class="current-time">{{ currentTime }}</div>
+        <div class="current-date">{{ currentDate }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Check-In/Check-Out Card -->
+  <div class="card">
+    <div class="card-body">
+      <div class="attendance-actions">
+        <div class="row">
+          <!-- Status Section -->
+          <div class="col-md-6">
+            <div class="status-section">
+              <h3>Today's Status</h3>
+              <div class="status-details">
+                <div class="status-item">
+                  <span class="status-label">Status:</span>
+                  <span class="status-value" *ngIf="attendanceStatus">
+                    <span class="status-badge" [ngClass]="{
+                      'present': attendanceStatus === 'Present',
+                      'absent': attendanceStatus === 'Absent',
+                      'late': attendanceStatus === 'Late',
+                      'leave': attendanceStatus === 'Leave'
+                    }">
+                      {{ attendanceStatus }}
+                    </span>
+                  </span>
+                  <span class="status-value" *ngIf="!attendanceStatus">Not checked in</span>
+                </div>
+                <div class="status-item" *ngIf="checkInTime">
+                  <span class="status-label">Check-In Time:</span>
+                  <span class="status-value">{{ checkInTime }}</span>
+                </div>
+                <div class="status-item" *ngIf="checkOutTime">
+                  <span class="status-label">Check-Out Time:</span>
+                  <span class="status-value">{{ checkOutTime }}</span>
+                </div>
+                <div class="status-item" *ngIf="workingHours">
+                  <span class="status-label">Working Hours:</span>
+                  <span class="status-value">{{ workingHours }} hours</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="col-md-6">
+            <div class="action-section">
+              <h3>Actions</h3>
+              <div class="action-buttons">
+                <button 
+                  class="btn btn-primary check-in-btn" 
+                  [disabled]="hasCheckedInToday" 
+                  (click)="checkIn()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="btn-icon">
+                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd" />
+                  </svg>
+                  Check In
+                </button>
+                <button 
+                  class="btn btn-secondary check-out-btn" 
+                  [disabled]="!hasCheckedInToday || checkOutTime" 
+                  (click)="checkOut()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="btn-icon">
+                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clip-rule="evenodd" />
+                  </svg>
+                  Check Out
+                </button>
+              </div>
+              <div class="action-note">
+                <p *ngIf="!hasCheckedInToday">
+                  You haven't checked in today. Click the Check In button to record your attendance.
+                </p>
+                <p *ngIf="hasCheckedInToday && !checkOutTime">
+                  You've checked in at {{ checkInTime }}. Don't forget to check out before leaving.
+                </p>
+                <p *ngIf="checkOutTime">
+                  You've completed your workday. See you tomorrow!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance History Link -->
+  <div class="view-history-link">
+    <a routerLink="/employee/attendance/list">View Attendance History</a>
+  </div>
+</div>

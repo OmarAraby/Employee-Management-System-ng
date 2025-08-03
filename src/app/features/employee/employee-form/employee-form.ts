@@ -43,7 +43,7 @@ export class EmployeeForm {
       nationalId: ['', [Validators.required, Validators.pattern(/^\d{10,14}$/)]],
       age: ['', [Validators.required, Validators.min(18), Validators.max(65)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
-      email: ['', [Validators.email]],
+      email: ['', [Validators.email]], // Email is optional
       status: [EmployeeStatus.Active, [Validators.required]]
     });
   }
@@ -73,9 +73,10 @@ export class EmployeeForm {
         this.loadingService.setLoading(false);
       },
       error: (error) => {
+        console.error('Load employee error:', error);
         this.notificationService.showError('Error', 'Failed to load employee data');
         this.loadingService.setLoading(false);
-        this.router.navigate(['/employees']);
+        this.router.navigate(['/admin/employees']);
       }
     });
   }
@@ -130,8 +131,12 @@ export class EmployeeForm {
     
     // Reset file input
     const fileInput = document.getElementById('signatureFile') as HTMLInputElement;
+    const replaceFileInput = document.getElementById('replaceSignatureFile') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
+    }
+    if (replaceFileInput) {
+      replaceFileInput.value = '';
     }
   }
 
@@ -139,11 +144,11 @@ export class EmployeeForm {
     this.submitted = true;
 
     if (this.employeeForm.invalid) {
+      console.log('Form is invalid:', this.employeeForm.errors);
+      this.markFormGroupTouched(this.employeeForm);
       this.notificationService.showError('Form Invalid', 'Please fill all required fields correctly');
       return;
     }
-
-    this.loadingService.setLoading(true);
 
     if (this.isEditMode) {
       this.updateEmployee();
@@ -153,10 +158,44 @@ export class EmployeeForm {
   }
 
   createEmployee(): void {
-    const formData = this.employeeForm.value as CreateEmployeeDto;
+    if (this.employeeForm.invalid) {
+      this.markFormGroupTouched(this.employeeForm);
+      this.notificationService.showError('Form Invalid', 'Please fill all required fields correctly');
+      return;
+    }
+
+    this.loadingService.setLoading(true);
+
+    const rawFormData = this.employeeForm.value;
+    console.log('Raw form data:', rawFormData);
+
+    // Create proper DTO - ensure all required fields are present and properly typed
+    const formData: CreateEmployeeDto = {
+      firstName: (rawFormData.firstName || '').toString().trim(),
+      lastName: (rawFormData.lastName || '').toString().trim(),
+      nationalId: (rawFormData.nationalId || '').toString().trim(),
+      age: parseInt(rawFormData.age, 10) || 0,
+      phoneNumber: (rawFormData.phoneNumber || '').toString().trim(),
+      email: rawFormData.email ? rawFormData.email.toString().trim() : undefined,
+      status: rawFormData.status || EmployeeStatus.Active
+    };
+
+    // Final validation
+    if (!formData.firstName || !formData.lastName || !formData.nationalId || 
+        !formData.phoneNumber || formData.age < 18) {
+      console.error('Form data validation failed:', formData);
+      this.notificationService.showError('Validation Error', 'Please check all required fields');
+      this.loadingService.setLoading(false);
+      return;
+    }
+
+    console.log('Processed form data to send:', formData);
 
     this.employeeService.addEmployee(formData).subscribe({
       next: (response) => {
+        console.log('Create employee response:', response);
+        this.loadingService.setLoading(false);
+        
         if (response.success && response.data) {
           this.notificationService.showSuccess('Success', 'Employee created successfully');
           
@@ -164,16 +203,44 @@ export class EmployeeForm {
           if (this.selectedFile && response.data.id) {
             this.uploadSignature(response.data.id);
           } else {
-            this.router.navigate(['/employees']);
+            this.router.navigate(['/admin/employees']);
           }
         } else {
-          this.notificationService.showError('Error', response.message || 'Failed to create employee');
+          const errorMessage = response.message || 'Failed to create employee';
+          this.notificationService.showError('Error', errorMessage);
         }
-        this.loadingService.setLoading(false);
       },
       error: (error) => {
+        console.error('Create employee error:', error);
         this.loadingService.setLoading(false);
-        this.notificationService.showError('Error', 'Failed to create employee');
+        
+        let errorMessage = 'Failed to create employee';
+        let validationErrors: string[] = [];
+        
+        // Extract error details
+        if (error.error) {
+          if (error.error.errors && Array.isArray(error.error.errors)) {
+            validationErrors = error.error.errors.map((err: any) => {
+              if (typeof err === 'string') return err;
+              if (err.message) return err.message;
+              return JSON.stringify(err);
+            });
+            errorMessage = `Validation failed: ${validationErrors.join(', ')}`;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          } else if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        this.notificationService.showError('Creation Failed', errorMessage);
+        
+        // Log for debugging
+        if (validationErrors.length > 0) {
+          console.error('Server validation errors:', validationErrors);
+        }
       }
     });
   }
@@ -181,13 +248,35 @@ export class EmployeeForm {
   updateEmployee(): void {
     if (!this.employeeId) return;
 
-    const formData = { 
-      ...this.employeeForm.value,
-      id: this.employeeId 
-    } as EmployeeDto;
+    this.loadingService.setLoading(true);
+
+    const rawFormData = this.employeeForm.value;
+    console.log('Raw update form data:', rawFormData);
+
+    const formData: EmployeeDto = { 
+      id: this.employeeId,
+      firstName: (rawFormData.firstName || '').toString().trim(),
+      lastName: (rawFormData.lastName || '').toString().trim(),
+      fullName: '', // This will be set by the server
+      nationalId: (rawFormData.nationalId || '').toString().trim(),
+      age: parseInt(rawFormData.age, 10) || 0,
+      phoneNumber: (rawFormData.phoneNumber || '').toString().trim(),
+      email: rawFormData.email ? rawFormData.email.toString().trim() : '',
+      status: rawFormData.status || EmployeeStatus.Active,
+      statusDisplayName: '', // This will be set by the server
+      signature: this.signaturePreview || undefined,
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      isActive: rawFormData.status === EmployeeStatus.Active
+    };
+
+    console.log('Processed update data to send:', formData);
 
     this.employeeService.updateEmployee(this.employeeId, formData).subscribe({
       next: (response) => {
+        console.log('Update employee response:', response);
+        this.loadingService.setLoading(false);
+        
         if (response.success) {
           this.notificationService.showSuccess('Success', 'Employee updated successfully');
           
@@ -195,46 +284,60 @@ export class EmployeeForm {
           if (this.selectedFile) {
             this.uploadSignature(this.employeeId!);
           } else {
-            this.router.navigate(['/employees']);
+            this.router.navigate(['/admin/employees']);
           }
         } else {
-          this.notificationService.showError('Error', response.message || 'Failed to update employee');
+          const errorMessage = response.message || 'Failed to update employee';
+          this.notificationService.showError('Error', errorMessage);
         }
-        this.loadingService.setLoading(false);
       },
       error: (error) => {
+        console.error('Update employee error:', error);
         this.loadingService.setLoading(false);
-        this.notificationService.showError('Error', 'Failed to update employee');
+        
+        let errorMessage = 'Failed to update employee';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        }
+        
+        this.notificationService.showError('Update Failed', errorMessage);
       }
     });
   }
 
   uploadSignature(employeeId: string): void {
     if (!this.selectedFile) {
-      this.router.navigate(['/employees']);
+      this.router.navigate(['/admin/employees']);
       return;
     }
 
-    // Note: You'll need to inject SignatureService here
-    // this.signatureService.uploadSignature(employeeId, this.selectedFile).subscribe({
-    //   next: (response) => {
-    //     if (response.success) {
-    //       this.notificationService.showSuccess('Success', 'Signature uploaded successfully');
-    //     }
-    //     this.router.navigate(['/employees']);
-    //   },
-    //   error: (error) => {
-    //     this.notificationService.showError('Warning', 'Employee saved but signature upload failed');
-    //     this.router.navigate(['/employees']);
-    //   }
-    // });
-    
-    // For now, just navigate
-    this.router.navigate(['/employees']);
+    // Note: You'll need to implement signature upload service
+    console.log('Would upload signature for employee:', employeeId);
+    this.router.navigate(['/admin/employees']);
   }
 
   cancel(): void {
-    this.router.navigate(['/employees']);
+    this.router.navigate(['/admin/employees']);
+  }
+
+  viewEmployeeDetails(): void {
+    if (this.employeeId) {
+      this.router.navigate(['/admin/employees', this.employeeId]);
+    }
+  }
+
+  // Helper method to mark all form fields as touched
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      control?.markAsTouched({ onlySelf: true });
+      
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 
   // Utility methods
@@ -255,17 +358,32 @@ export class EmployeeForm {
   getFieldError(fieldName: string): string {
     const field = this.employeeForm.get(fieldName);
     if (field && field.errors) {
-      if (field.errors['required']) return `${fieldName} is required`;
-      if (field.errors['minlength']) return `${fieldName} is too short`;
-      if (field.errors['maxlength']) return `${fieldName} is too long`;
-      if (field.errors['min']) return `${fieldName} must be at least ${field.errors['min'].min}`;
-      if (field.errors['max']) return `${fieldName} must be at most ${field.errors['max'].max}`;
+      const fieldDisplayName = this.getFieldDisplayName(fieldName);
+      
+      if (field.errors['required']) return `${fieldDisplayName} is required`;
+      if (field.errors['minlength']) return `${fieldDisplayName} must be at least ${field.errors['minlength'].requiredLength} characters`;
+      if (field.errors['maxlength']) return `${fieldDisplayName} must be no more than ${field.errors['maxlength'].requiredLength} characters`;
+      if (field.errors['min']) return `${fieldDisplayName} must be at least ${field.errors['min'].min}`;
+      if (field.errors['max']) return `${fieldDisplayName} must be at most ${field.errors['max'].max}`;
       if (field.errors['pattern']) {
-        if (fieldName === 'nationalId') return 'National ID must be 10-14 digits';
+        if (fieldName === 'nationalId') return 'National ID must be 10-14 digits only';
         if (fieldName === 'phoneNumber') return 'Please enter a valid phone number';
       }
       if (field.errors['email']) return 'Please enter a valid email address';
     }
     return '';
+  }
+
+  private getFieldDisplayName(fieldName: string): string {
+    const fieldNames: { [key: string]: string } = {
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      nationalId: 'National ID',
+      age: 'Age',
+      phoneNumber: 'Phone Number',
+      email: 'Email',
+      status: 'Status'
+    };
+    return fieldNames[fieldName] || fieldName;
   }
 }

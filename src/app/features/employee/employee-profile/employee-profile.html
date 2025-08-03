@@ -1,0 +1,91 @@
+<div class="profile-container">
+  <div class="page-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <h1 class="page-title">Employee Profile</h1>
+      <button class="btn btn-outline-primary" routerLink="/employee/edit-profile">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="icon-sm">
+          <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+          <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
+        </svg>
+        Edit Profile
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-content" *ngIf="employee">
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <div class="avatar-placeholder">
+          {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
+        </div>
+      </div>
+      <div class="profile-info">
+        <h2 class="profile-name">{{ employee.firstName }} {{ employee.lastName }}</h2>
+        <p class="profile-id">Employee ID: {{ employee.id }}</p>
+        <div class="profile-status" [ngClass]="{'active': employee.status === 'Active', 'inactive': employee.status === 'Inactive'}">
+          {{ employee.status }}
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-details">
+      <div class="card">
+        <div class="card-header">
+          <h3>Personal Information</h3>
+        </div>
+        <div class="card-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Full Name</span>
+              <span class="info-value">{{ employee.firstName }} {{ employee.lastName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ employee.email || 'Not provided' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone Number</span>
+              <span class="info-value">{{ employee.phoneNumber }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Age</span>
+              <span class="info-value">{{ employee.age }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">National ID</span>
+              <span class="info-value">{{ employee.nationalId }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <span class="info-value status-badge" [ngClass]="{'active': employee.status === 'Active', 'inactive': employee.status === 'Inactive'}">{{ employee.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Signature</h3>
+        </div>
+        <div class="card-body signature-section">
+          <div class="signature-placeholder" *ngIf="!employee.signature">
+            <p>No signature uploaded</p>
+            <button class="btn btn-primary" routerLink="/employee/signature">
+              Upload Signature
+            </button>
+          </div>
+          <div class="signature-preview" *ngIf="employee.signature">
+            <img [src]="employee.signature" alt="Employee Signature">
+            <button class="btn btn-outline-primary mt-3" routerLink="/employee/signature">
+              Update Signature
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-placeholder" *ngIf="!employee">
+    <p>Loading employee profile...</p>
+  </div>
+</div>

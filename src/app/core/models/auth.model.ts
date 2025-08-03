@@ -6,7 +6,7 @@ export interface LoginDto {
 
 // login-response.dto.ts
 export interface LoginResponseDto {
-  id: number;
+  employeeId: number;
   email: string;
   fullName: string;
   firstName?: string;  // Make optional to maintain backward compatibility

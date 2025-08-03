@@ -1,214 +1,662 @@
-<!-- employee-list.component.html -->
+<!-- Enhanced Employee List Template with Modals -->
 <div class="employee-list-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="loading$ | async" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Header Section -->
   <div class="page-header">
-    <h2>Employee Management</h2>
-    <div class="header-actions">
-      <button class="btn btn-primary" (click)="addEmployee()">
-        <i class="fas fa-plus me-2"></i>Add Employee
-      </button>
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="page-title mb-1">Employee Management</h2>
+        <p class="text-muted mb-0">Manage your workforce efficiently</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline-secondary me-2" (click)="exportEmployees()" [disabled]="employees.length === 0">
+          <i class="fas fa-download me-2"></i>Export
+        </button>
+        <button class="btn btn-primary" (click)="addEmployee()">
+          <i class="fas fa-plus me-2"></i>Add Employee
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Filters and Search -->
+  <!-- Search and Filters -->
   <div class="filter-section">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-text">
-            <i class="fas fa-search"></i>
-          </span>
-          <input 
-            type="text" 
-            class="form-control"
-            placeholder="Search by name, email, or ID..."
-            [(ngModel)]="queryParams.searchTerm"
-            (keyup.enter)="onSearch()">
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Search Bar -->
+          <div class="col-md-4">
+            <div class="search-container p-4">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  placeholder="Search by name, email, or National ID..."
+                  [(ngModel)]="queryParams.searchTerm"
+                  (keyup.enter)="onSearch()"
+                  (input)="onSearchInput($event)">
+                <button class="btn btn-outline-secondary" type="button" (click)="clearSearch()" *ngIf="queryParams.searchTerm">
+                  <i class="fas fa-times"></i>
+                  clear
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sort Options -->
+          <div class="col-md-2">
+            <label class="form-label">Sort By</label>
+            <div class="input-group">
+              <select class="form-select" [(ngModel)]="queryParams.sortBy" (change)="onSortChange()">
+                <option *ngFor="let option of sortOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Page Size -->
+          <div class="col-md-2">
+            <label class="form-label">Per Page</label>
+            <select class="form-select" [(ngModel)]="queryParams.pageSize" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+            </select>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select class="form-select" [(ngModel)]="queryParams.status" (change)="onFilterChange()">
+              <option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Filter Toggle -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="toggleFilters()">
+              <i class="fas fa-filter me-2"></i>
+              {{ showFilters ? 'Less' : 'More' }} Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="advanced-filters" [class.show]="showFilters">
+          <hr class="my-3">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Age Range</label>
+              <div class="input-group">
+                <input 
+                  type="number" 
+                  class="form-control"
+                  placeholder="Min"
+                  [(ngModel)]="queryParams.minAge"
+                  (change)="onFilterChange()">
+                <span class="input-group-text">to</span>
+                <input 
+                  type="number" 
+                  class="form-control"
+                  placeholder="Max"
+                  [(ngModel)]="queryParams.maxAge"
+                  (change)="onFilterChange()">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Date Range</label>
+              <div class="input-group">
+                <input 
+                  type="date" 
+                  class="form-control"
+                  [(ngModel)]="queryParams.startDate"
+                  (change)="onFilterChange()">
+                <span class="input-group-text">to</span>
+                <input 
+                  type="date" 
+                  class="form-control"
+                  [(ngModel)]="queryParams.endDate"
+                  (change)="onFilterChange()">
+              </div>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button class="btn btn-outline-danger" (click)="clearFilters()">
+                <i class="fas fa-times me-2"></i>Clear Filters
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div class="col-md-2">
-        <label class="form-label">Sort By</label>
-        <select class="form-select" [(ngModel)]="queryParams.sortBy" (change)="onSortChange()">
-          @for (option of sortOptions; track option.value) {
-            <option [value]="option.value">
-              {{ option.label }}
-            </option>
-          }
-        </select>
-      </div>
+    </div>
+  </div>
 
-      <div class="col-md-2">
-        <label class="form-label">Per Page</label>
-        <select class="form-select" [(ngModel)]="queryParams.pageSize" (change)="onPageSizeChange()">
-          @for (size of pageSizeOptions; track size) {
-            <option [value]="size">{{ size }}</option>
-          }
-        </select>
+  <!-- Bulk Actions -->
+  <div class="bulk-actions-section" *ngIf="selectedEmployees.length > 0">
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+      <span>
+        <i class="fas fa-info-circle me-2"></i>
+        {{ selectedEmployees.length }} employee(s) selected
+      </span>
+      <div class="bulk-actions">
+        <button class="btn btn-sm btn-outline-danger me-2" (click)="openBulkDeleteModal()">
+          <i class="fas fa-trash me-1"></i>Delete Selected
+        </button>
+        <button class="btn btn-sm btn-outline-secondary me-2" (click)="bulkExport()">
+          <i class="fas fa-download me-1"></i>Export Selected
+        </button>
+        <button class="btn btn-sm btn-outline-warning" (click)="bulkStatusChange()">
+          <i class="fas fa-edit me-1"></i>Change Status
+        </button>
       </div>
+    </div>
+  </div>
 
-      <div class="col-md-2">
-        <label class="form-label">Status</label>
-        <select class="form-select" [(ngModel)]="queryParams.status" (change)="onFilterChange()">
-          @for (status of statusOptions; track status.value) {
-            <option [value]="status.value">
-              {{ status.label }}
-            </option>
-          }
-        </select>
+  <!-- Results Summary -->
+  <div class="results-summary" *ngIf="paginatedResult && employees.length > 0">
+    <div class="results-info">
+      <span class="results-text">
+        Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ paginatedResult.totalCount }} employees
+        <span *ngIf="queryParams.searchTerm" class="search-term">
+          for "<strong>{{ queryParams.searchTerm }}</strong>"
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Employee Table -->
+  <div class="table-section">
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th width="50">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input" 
+                  [checked]="selectAll" 
+                  [indeterminate]="isIndeterminate()"
+                  (change)="toggleSelectAll()">
+              </th>
+              <th>Employee</th>
+              <th>Contact</th>
+              <th>Age</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th width="120">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let employee of employees; trackBy: trackByEmployeeId" 
+                [class.table-active]="isEmployeeSelected(employee.id)">
+              <td>
+                <input 
+                  type="checkbox" 
+                  class="form-check-input" 
+                  [checked]="isEmployeeSelected(employee.id)"
+                  (change)="toggleEmployeeSelection(employee.id)">
+              </td>
+              <td>
+                <div class="employee-info">
+                  <div class="employee-avatar" [style.background]="getEmployeeColor(employee.firstName + employee.lastName)">
+                    {{ getInitials(employee.firstName, employee.lastName) }}
+                  </div>
+                  <div class="employee-details">
+                    <div class="employee-name">{{ employee.fullName }}</div>
+                    <small class="text-muted">ID: {{ employee.nationalId }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <div>{{ employee.email }}</div>
+                  <small class="text-muted" *ngIf="employee.phoneNumber">{{ employee.phoneNumber }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="age-badge">{{ employee.age }} years</span>
+              </td>
+              <td>
+                <span class="status-badge" [class.active]="employee.statusDisplayName === 'Active'" [class.inactive]="employee.statusDisplayName === 'Inactive'">
+                  {{ employee.statusDisplayName }}
+                </span>
+              </td>
+              <td>{{ employee.createdDate | date:'MMM dd, yyyy' }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button 
+                    class="btn btn-sm btn-outline-primary" 
+                    (click)="openViewModal(employee)"
+                    title="View Details">
+                    <i class="fas fa-eye"></i>
+                    View
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-outline-secondary" 
+                    (click)="openEditModal(employee)"
+                    title="Edit Employee">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-danger" 
+                    (click)="openDeleteModal(employee)"
+                    title="Delete Employee">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
+  </div>
 
-      <div class="col-md-2">
-        <div class="filter-toggle">
-          <button class="btn btn-outline-secondary" (click)="toggleFilters()">
-            <i class="fas fa-filter me-2"></i>More Filters
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="employees.length === 0 && !(loading$ | async)">
+    <div class="empty-icon">
+      <i class="fas fa-users"></i>
+    </div>
+    <h5>No employees found</h5>
+    <p class="text-muted">
+      <span *ngIf="queryParams.searchTerm || queryParams.status">
+        Try adjusting your search criteria or filters.
+      </span>
+      <span *ngIf="!queryParams.searchTerm && !queryParams.status">
+        Get started by adding your first employee.
+      </span>
+    </p>
+    <button class="btn btn-primary" (click)="addEmployee()" *ngIf="!queryParams.searchTerm && !queryParams.status">
+      <i class="fas fa-plus me-2"></i>Add First Employee
+    </button>
+    <button class="btn btn-outline-secondary" (click)="clearFilters()" *ngIf="queryParams.searchTerm || queryParams.status">
+      <i class="fas fa-times me-2"></i>Clear Filters
+    </button>
+  </div>
+
+  <!-- Simple Pagination -->
+  <div class="pagination-section" *ngIf="paginatedResult && paginatedResult.totalPages > 1">
+    <div class="pagination-controls">
+      <div class="pagination-info">
+        <span>Page {{ paginatedResult.pageNumber }} of {{ paginatedResult.totalPages }}</span>
+      </div>
+      <div class="pagination-buttons">
+        <button 
+          class="btn btn-outline-secondary btn-sm" 
+          [disabled]="!paginatedResult.hasPreviousPage"
+          (click)="onPageChange(1)">
+          <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button 
+          class="btn btn-outline-secondary btn-sm" 
+          [disabled]="!paginatedResult.hasPreviousPage"
+          (click)="onPageChange(paginatedResult.pageNumber - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="page-display">{{ paginatedResult.pageNumber }}</span>
+        <button 
+          class="btn btn-outline-secondary btn-sm" 
+          [disabled]="!paginatedResult.hasNextPage"
+          (click)="onPageChange(paginatedResult.pageNumber + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button 
+          class="btn btn-outline-secondary btn-sm" 
+          [disabled]="!paginatedResult.hasNextPage"
+          (click)="onPageChange(paginatedResult.totalPages)">
+          <i class="fas fa-angle-double-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-overlay" (click)="closeDeleteModal()"></div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">
+            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+            Confirm Deletion
+          </h5>
+          <button type="button" class="btn-close" (click)="closeDeleteModal()" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center" *ngIf="employeeToDelete">
+            <div class="delete-icon mb-3">
+              <i class="fas fa-user-times"></i>
+            </div>
+            <h6 class="mb-3">Are you sure you want to delete this employee?</h6>
+            <div class="employee-info-card">
+              <div class="employee-avatar-large" [style.background]="getEmployeeColor(employeeToDelete.firstName + employeeToDelete.lastName)">
+                {{ getInitials(employeeToDelete.firstName, employeeToDelete.lastName) }}
+              </div>
+              <div class="employee-details-large">
+                <h6 class="employee-name-large">{{ employeeToDelete.fullName }}</h6>
+                <p class="employee-email-large">{{ employeeToDelete.email }}</p>
+                <small class="text-muted">ID: {{ employeeToDelete.nationalId }}</small>
+              </div>
+            </div>
+            <div class="alert alert-warning mt-3">
+              <i class="fas fa-info-circle me-2"></i>
+              This action cannot be undone. All employee data will be permanently removed.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDeleteModal()">
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+            <span *ngIf="isDeleting">
+              <i class="fas fa-spinner fa-spin me-2"></i>Deleting...
+            </span>
+            <span *ngIf="!isDeleting">
+              <i class="fas fa-trash me-2"></i>Delete Employee
+            </span>
           </button>
         </div>
       </div>
     </div>
+  </div>
 
-    @if (showFilters) {
-      <div class="advanced-filters">
-        <div class="row">
-          <div class="col-md-3">
-            <label class="form-label">Minimum Age</label>
-            <input 
-              type="number" 
-              class="form-control"
-              placeholder="Minimum age"
-              [(ngModel)]="queryParams.minAge"
-              (change)="onFilterChange()">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Maximum Age</label>
-            <input 
-              type="number" 
-              class="form-control"
-              placeholder="Maximum age"
-              [(ngModel)]="queryParams.maxAge"
-              (change)="onFilterChange()">
+  <!-- View Employee Modal -->
+  <div class="modal fade" [class.show]="showViewModal" [style.display]="showViewModal ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-overlay" (click)="closeViewModal()"></div>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewModalLabel">
+            <i class="fas fa-user me-2"></i>
+            Employee Details
+          </h5>
+          <button type="button" class="btn-close" (click)="closeViewModal()" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" *ngIf="selectedEmployee">
+          <div class="employee-profile">
+            <!-- Profile Header -->
+            <div class="profile-header">
+              <div class="profile-avatar" [style.background]="getEmployeeColor(selectedEmployee.firstName + selectedEmployee.lastName)">
+                {{ getInitials(selectedEmployee.firstName, selectedEmployee.lastName) }}
+              </div>
+              <div class="profile-info">
+                <h4 class="profile-name">{{ selectedEmployee.fullName }}</h4>
+                <p class="profile-email">{{ selectedEmployee.email }}</p>
+                <span class="status-badge" [class.active]="selectedEmployee.statusDisplayName === 'Active'" 
+                      [class.inactive]="selectedEmployee.statusDisplayName === 'Inactive'">
+                  {{ selectedEmployee.statusDisplayName }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="profile-details">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-id-card me-2"></i>National ID
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.nationalId }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-phone me-2"></i>Phone Number
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.phoneNumber || 'Not provided' }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-birthday-cake me-2"></i>Age
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.age }} years old</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-calendar-alt me-2"></i>Join Date
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.createdDate | date:'MMMM dd, yyyy' }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6" *ngIf="selectedEmployee.department">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-building me-2"></i>Department
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.department }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <label class="detail-label">
+                      <i class="fas fa-hashtag me-2"></i>Employee ID
+                    </label>
+                    <p class="detail-value">{{ selectedEmployee.employeeId || selectedEmployee.id }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeViewModal()">
+            <i class="fas fa-times me-2"></i>Close
+          </button>
+          <button type="button" class="btn btn-primary" (click)="editFromView()">
+            <i class="fas fa-edit me-2"></i>Edit Employee
+          </button>
+        </div>
       </div>
-    }
-  </div>
-
-  <!-- Results Info -->
-  @if (paginatedResult) {
-    <div class="results-info">
-      <span class="text-muted">
-        Showing {{ ((paginatedResult.pageNumber - 1) * paginatedResult.pageSize) + 1 }} 
-        to {{ Math.min(paginatedResult.pageNumber * paginatedResult.pageSize, paginatedResult.totalCount) }}
-        of {{ paginatedResult.totalCount }} employees
-      </span>
     </div>
-  }
-
-  <!-- Employee Table -->
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>
-            <input 
-              type="checkbox" 
-              class="form-check-input" 
-              [checked]="selectAll" 
-              (change)="toggleSelectAll()">
-          </th>
-          <th>Employee ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Department</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (employee of employees; track employee.id) {
-          <tr>
-            <td>
-              <input 
-                type="checkbox" 
-                class="form-check-input" 
-                [checked]="isEmployeeSelected(employee.id)"
-                (change)="toggleEmployeeSelection(employee.id)">
-            </td>
-            <td>{{ employee.employeeId }}</td>
-            <td>
-              <div class="employee-info">
-                <div class="avatar">
-                  {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
-                </div>
-                {{ employee.firstName }} {{ employee.lastName }}
-              </div>
-            </td>
-            <td>{{ employee.email }}</td>
-            <td>{{ employee.department }}</td>
-            <td>
-              <span [class]="getStatusBadgeClass(employee.status)">
-                {{ employee.status }}
-              </span>
-            </td>
-            <td>
-              <div class="btn-group" role="group">
-                <button 
-                  class="btn btn-sm btn-outline-info" 
-                  (click)="viewEmployee(employee.id)"
-                  title="View Details">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button 
-                  class="btn btn-sm btn-outline-primary" 
-                  (click)="editEmployee(employee.id)"
-                  title="Edit Employee">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button 
-                  class="btn btn-sm btn-outline-danger" 
-                  (click)="deleteEmployee(employee.id, employee.fullName)"
-                  title="Delete Employee">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
   </div>
 
-  <!-- Pagination -->
-  @if (paginatedResult && paginatedResult.totalPages > 1) {
-    <nav class="mt-4">
-      <ul class="pagination justify-content-center">
-        <li class="page-item" [class.disabled]="!paginatedResult.hasPreviousPage">
-          <a class="page-link" (click)="onPageChange(paginatedResult.pageNumber - 1)">
-            <i class="fas fa-chevron-left"></i>
-          </a>
-        </li>
+  <!-- Edit Employee Modal -->
+  <div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-overlay" (click)="closeEditModal()"></div>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">
+            <i class="fas fa-edit me-2"></i>
+            Edit Employee
+          </h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" *ngIf="editingEmployee">
+          <form #editForm="ngForm" (ngSubmit)="saveEmployee()">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">First Name *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.firstName"
+                    name="firstName"
+                    required
+                    #firstName="ngModel">
+                  <div class="invalid-feedback" *ngIf="firstName.invalid && firstName.touched">
+                    First name is required
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Last Name *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.lastName"
+                    name="lastName"
+                    required
+                    #lastName="ngModel">
+                  <div class="invalid-feedback" *ngIf="lastName.invalid && lastName.touched">
+                    Last name is required
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Email *</label>
+                  <input 
+                    type="email" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.email"
+                    name="email"
+                    required
+                    email
+                    #email="ngModel">
+                  <div class="invalid-feedback" *ngIf="email.invalid && email.touched">
+                    Valid email is required
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.phoneNumber"
+                    name="phoneNumber">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">National ID *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.nationalId"
+                    name="nationalId"
+                    required
+                    #nationalId="ngModel">
+                  <div class="invalid-feedback" *ngIf="nationalId.invalid && nationalId.touched">
+                    National ID is required
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Age *</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="editingEmployee.age"
+                    name="age"
+                    required
+                    min="18"
+                    max="100"
+                    #age="ngModel">
+                  <div class="invalid-feedback" *ngIf="age.invalid && age.touched">
+                    Valid age is required (18-100)
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Status</label>
+                  <select 
+                    class="form-select" 
+                    [(ngModel)]="editingEmployee.status"
+                    name="status">
+                    <option *ngFor="let status of statusOptions.slice(1)" [value]="status.value">
+                      {{ status.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+           
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeEditModal()">
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveEmployee()" [disabled]="isSaving || !isFormValid()">
+            <span *ngIf="isSaving">
+              <i class="fas fa-spinner fa-spin me-2"></i>Saving...
+            </span>
+            <span *ngIf="!isSaving">
+              <i class="fas fa-save me-2"></i>Save Changes
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        @for (page of getPaginationPages(); track page) {
-          <li 
-            class="page-item" 
-            [class.active]="page === paginatedResult.pageNumber">
-            <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
-          </li>
-        }
-        
-        @if (paginatedResult.pageNumber < paginatedResult.totalPages - 2) {
-          <li class="page-item">
-            <a class="page-link" (click)="onPageChange(paginatedResult.totalPages)">
-              {{ paginatedResult.totalPages }}
-            </a>
-          </li>
-        }
-        
-        <li class="page-item" [class.disabled]="!paginatedResult.hasNextPage">
-          <a class="page-link" (click)="onPageChange(paginatedResult.pageNumber + 1)">
-            <i class="fas fa-chevron-right"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  }
+  <!-- Bulk Delete Confirmation Modal -->
+  <div class="modal fade" [class.show]="showBulkDeleteModal" [style.display]="showBulkDeleteModal ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-overlay" (click)="closeBulkDeleteModal()"></div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bulkDeleteModalLabel">
+            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+            Confirm Bulk Deletion
+          </h5>
+          <button type="button" class="btn-close" (click)="closeBulkDeleteModal()" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <div class="bulk-delete-icon mb-3">
+              <i class="fas fa-users-slash"></i>
+            </div>
+            <h6 class="mb-3">Are you sure you want to delete {{ selectedEmployees.length }} employee(s)?</h6>
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              This action cannot be undone. All selected employee data will be permanently removed.
+            </div>
+            <div class="selected-count">
+              <strong>{{ selectedEmployees.length }}</strong> employees selected for deletion
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeBulkDeleteModal()">
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmBulkDelete()" [disabled]="isBulkDeleting">
+            <span *ngIf="isBulkDeleting">
+              <i class="fas fa-spinner fa-spin me-2"></i>Deleting...
+            </span>
+            <span *ngIf="!isBulkDeleting">
+              <i class="fas fa-trash me-2"></i>Delete All Selected
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

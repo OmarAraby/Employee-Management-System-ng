@@ -1,0 +1,143 @@
+<div class="dashboard-container">
+  <!-- Dashboard Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Total Employees</h3>
+        <span class="stat-value">{{ stats?.totalEmployees || 0 }}</span>
+      </div>
+      <div class="stat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
+        </svg>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Active Employees</h3>
+        <span class="stat-value">{{ stats?.activeEmployees }}</span>
+        <span class="stat-change positive">{{ stats?.activeEmployees || 0 }}%</span>
+      </div>
+      <div class="stat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+          <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>Inactive Employees</h3>
+        <span class="stat-value">{{ stats?.inactiveEmployees }}</span>
+        <span class="stat-change">{{ stats?.inactiveEmployees || 0 }}%</span>
+
+      </div>
+      <div class="stat-info"></div>
+      <div class="stat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.75 8.25a.75.75 0 01.75.75c0 1.12-.492 2.126-1.27 2.812a.75.75 0 11-.992-1.124A2.243 2.243 0 0015 9a.75.75 0 01.75-.75z" />
+          <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM4.575 15.6a8.25 8.25 0 009.348 4.425 1.966 1.966 0 00-1.84-1.275.983.983 0 01-.97-.822l-.073-.437c-.094-.565.25-1.11.8-1.267l.99-.282c.427-.123.783-.418.982-.816l.036-.073a1.453 1.453 0 012.328-.377L16.5 15.9a8.25 8.25 0 002.25-5.4 1.5 1.5 0 00-1.5-1.5h-1.875a.75.75 0 01-.75-.75 1.5 1.5 0 011.5-1.5H18a.75.75 0 00.75-.75V6A.75.75 0 0018 5.25h-1.875C14.901 5.25 14 6.152 14 7.275v4.099a1.5 1.5 0 01-1.5 1.5h-3.75a.75.75 0 00-.75.75v3.938c0 .218.178.375.375.375.398 0 .789-.06 1.162-.175a.75.75 0 01.477 1.42 8.25 8.25 0 01-5.439-3.562z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+    
+    <!-- <div class="stat-card">
+      <div class="stat-info">
+        <h3>New Employees</h3>
+        <span class="stat-value">{{ stats?. || 0 }}</span>
+        <span class="stat-change positive">This Month</span>
+      </div>
+      <div class="stat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div> -->
+  </div>
+  
+  <!-- Recent Activity and Charts -->
+  <!-- <div class="content-grid">
+    <div class="card recent-activity">
+      <div class="card-header">
+        <h3>Recent Activity</h3>
+        <a routerLink="/admin/activity" class="view-all">View All</a>
+      </div>
+      <div class="card-body">
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+          <div class="activity-avatar">{{ getInitials(activity.name) }}</div>
+          <div class="activity-details">
+            <p><strong>{{ activity.name }}</strong> {{ activity.action }}</p>
+            <span class="activity-time">{{ activity.date }}, {{ activity.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card attendance-chart">
+      <div class="card-header">
+        <h3>Weekly Attendance</h3>
+        <div class="chart-legend">
+          <span class="legend-present"></span> Present
+          <span class="legend-absent"></span> Absent
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          Chart would be rendered here with a library like Chart.js
+          <div class="chart-placeholder"></div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  
+  <!-- Employee Table -->
+  <div class="card employee-table">
+    <div class="card-header">
+      <h3>Recent Employees</h3>
+      <a routerLink="/admin/employees" class="view-all">View All</a>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- This would be populated with actual employee data -->
+          <tr>
+            <td>#EMP-0042</td>
+            <td>
+              <div class="employee-info">
+                <div class="avatar">JD</div>
+                <span>John Doe</span>
+              </div>
+            </td>
+            <td>johndoeexample.com</td>
+            <td><span class="badge present">Active</span></td>
+            <td>
+              <button class="action-btn view">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                  <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button class="action-btn edit">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+                  <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,153 @@
+<div class="attendance-container">
+  <div class="page-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <h1 class="page-title">My Attendance</h1>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="filters-section">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="dateFrom" class="form-label">From Date</label>
+            <input 
+              type="date" 
+              id="dateFrom" 
+              class="form-control" 
+              [(ngModel)]="queryParams.startDate"
+              (change)="onDateRangeChange()">
+          </div>
+          <div class="col-md-4">
+            <label for="dateTo" class="form-label">To Date</label>
+            <input 
+              type="date" 
+              id="dateTo" 
+              class="form-control" 
+              [(ngModel)]="queryParams.endDate"
+              (change)="onDateRangeChange()">
+          </div>
+          <div class="col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select 
+              id="status" 
+              class="form-select" 
+              [(ngModel)]="queryParams.status"
+              (change)="onStatusChange()">
+              <option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="row g-3 mt-3">
+          <div class="col-md-4">
+            <label for="sortBy" class="form-label">Sort By</label>
+            <select 
+              id="sortBy" 
+              class="form-select" 
+              [(ngModel)]="queryParams.sortBy"
+              (change)="onSortChange()">
+              <option *ngFor="let option of sortOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="sortDirection" class="form-label">Sort Direction</label>
+            <select 
+              id="sortDirection" 
+              class="form-select" 
+              [(ngModel)]="queryParams.sortDirection"
+              (change)="onSortChange()">
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Records Table -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Working Hours</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of attendanceRecords">
+              <td>{{ record.date | date:'mediumDate' }}</td>
+              <td>{{ record.checkInTime || '-' }}</td>
+              <td>{{ record.checkOutTime || '-' }}</td>
+              <td>{{ record.workingHours || '-' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="{
+                  'present': record.status === 'Present',
+                  'absent': record.status === 'Absent',
+                  'late': record.status === 'Late',
+                  'leave': record.status === 'Leave'
+                }">
+                  {{ record.status }}
+                </span>
+              </td>
+              <td>{{ record.notes || '-' }}</td>
+            </tr>
+            <tr *ngIf="attendanceRecords.length === 0">
+              <td colspan="6" class="text-center py-4">
+                No attendance records found for the selected criteria.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="paginatedResult && paginatedResult.totalPages > 0">
+        <div class="pagination-info">
+          Showing {{ (paginatedResult.pageNumber - 1) * paginatedResult.pageSize + 1 }} to 
+          {{ Math.min(paginatedResult.pageNumber * paginatedResult.pageSize, paginatedResult.totalCount) }} of 
+          {{ paginatedResult.totalCount }} records
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="me-3">
+            <select class="form-select form-select-sm" [(ngModel)]="queryParams.pageSize" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+            </select>
+          </div>
+          <nav aria-label="Attendance pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="!paginatedResult.hasPreviousPage">
+                <button class="page-link" (click)="onPageChange(paginatedResult.pageNumber - 1)" [disabled]="!paginatedResult.hasPreviousPage">
+                  Previous
+                </button>
+              </li>
+              <li class="page-item" *ngFor="let page of [].constructor(paginatedResult.totalPages); let i = index" 
+                  [class.active]="paginatedResult.pageNumber === i + 1">
+                <button class="page-link" (click)="onPageChange(i + 1)">
+                  {{ i + 1 }}
+                </button>
+              </li>
+              <li class="page-item" [class.disabled]="!paginatedResult.hasNextPage">
+                <button class="page-link" (click)="onPageChange(paginatedResult.pageNumber + 1)" [disabled]="!paginatedResult.hasNextPage">
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

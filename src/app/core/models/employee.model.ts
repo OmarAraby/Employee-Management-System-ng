@@ -6,6 +6,8 @@ export interface CreateEmployeeDto {
     age: number;
     phoneNumber: string;
     signature?: string;
+    email?: string;
+    status?: EmployeeStatus;
   }
   
   // employee.dto.ts
