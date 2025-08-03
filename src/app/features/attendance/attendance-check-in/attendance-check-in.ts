@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { CheckInDto } from '../../../core/models/attendance.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-attendance-check-in',
@@ -50,61 +51,89 @@ export class AttendanceCheckIn implements OnInit {
   private checkTodayAttendance(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      this.notificationService.showError('User not authenticated');
+      this.notificationService.showError('Authentication Error', 'User not authenticated. Please login again.');
       return;
     }
 
     this.loadingService.setLoading(true);
-    // Here we would typically call an API to check today's attendance status
-    // For now, we'll simulate this with a mock implementation
-    setTimeout(() => {
-      this.loadingService.setLoading(false);
-      // Mock data - in a real app, this would come from the API
-      const mockAttendance = {
-        hasCheckedIn: Math.random() > 0.5,
-        checkInTime: '09:15 AM',
-        checkOutTime: Math.random() > 0.5 ? '05:30 PM' : null,
-        workingHours: 8.25,
-        status: 'Present'
-      };
+    
+    this.attendanceService.getTodayAttendance(currentUser.employeeId.toString()).subscribe({
+      next: (response) => {
+        this.loadingService.setLoading(false);
+        if (response.success && response.data) {
+          const attendance = response.data;
+          this.hasCheckedInToday = !!attendance.checkInTime;
+          this.checkInTime = attendance.checkInTime || null;
+          this.checkOutTime = null;
+          this.workingHours = null;
+          this.attendanceStatus = attendance.statusDisplayName || 'Present';
+        } else {
+          this.resetAttendanceState();
+        }
+      },
+      error: (error) => {
+        this.loadingService.setLoading(false);
+        console.error('Error loading today\'s attendance:', error);
+        
+        if (error.status === 404) {
+          this.resetAttendanceState();
+        } else {
+          this.notificationService.showError('Load Error', 'Unable to load today\'s attendance status');
+        }
+      }
+    });
+  }
 
-      this.hasCheckedInToday = mockAttendance.hasCheckedIn;
-      this.checkInTime = mockAttendance.checkInTime;
-      this.checkOutTime = mockAttendance.checkOutTime;
-      this.workingHours = mockAttendance.workingHours;
-      this.attendanceStatus = mockAttendance.status;
-    }, 1000);
+  private resetAttendanceState(): void {
+    this.hasCheckedInToday = false;
+    this.checkInTime = null;
+    this.checkOutTime = null;
+    this.workingHours = null;
+    this.attendanceStatus = 'Not Checked In';
   }
 
   checkIn(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      this.notificationService.showError('User not authenticated');
+      this.notificationService.showError('Authentication Error', 'User not authenticated. Please login again.');
+      return;
+    }
+
+    // Validate employee ID
+    if (!currentUser.employeeId) {
+      this.notificationService.showError('Validation Error', 'Employee ID is missing. Please contact your administrator.');
       return;
     }
 
     const checkInDto: CheckInDto = {
-      employeeId: currentUser.employeeId.toString(),
-      
+      employeeId: currentUser.employeeId.toString()
     };
+
+    console.log('Check-in payload:', checkInDto); // Debug log
 
     this.loadingService.setLoading(true);
     this.attendanceService.checkIn(checkInDto).subscribe({
       next: (response) => {
         this.loadingService.setLoading(false);
         if (response.success) {
-          this.notificationService.showSuccess('Successfully checked in');
+          this.notificationService.showSuccess('Check-in Successful', 'You have successfully checked in for today.');
           this.hasCheckedInToday = true;
           this.checkInTime = new Date().toLocaleTimeString();
           this.attendanceStatus = 'Present';
+          
+          // Refresh today's attendance status
+          this.checkTodayAttendance();
         } else {
-          this.notificationService.showError(response.message || 'Failed to check in');
+          const errorMessage = response.message || 'Failed to check in';
+          this.notificationService.showError('Check-in Failed', errorMessage);
         }
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
         this.loadingService.setLoading(false);
-        console.error('Error checking in:', error);
-        this.notificationService.showError('Failed to check in');
+        console.error('Check-in error details:', error);
+        
+        const errorMessage = this.extractErrorMessage(error);
+        this.notificationService.showError('Check-in Failed', errorMessage);
       }
     });
   }
@@ -112,25 +141,82 @@ export class AttendanceCheckIn implements OnInit {
   checkOut(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      this.notificationService.showError('User not authenticated');
+      this.notificationService.showError('Authentication Error', 'User not authenticated. Please login again.');
       return;
     }
 
     this.loadingService.setLoading(true);
-    // Here we would typically call an API to check out
-    // For now, we'll simulate this with a mock implementation
-    setTimeout(() => {
-      this.loadingService.setLoading(false);
-      this.notificationService.showSuccess('Successfully checked out');
-      this.checkOutTime = new Date().toLocaleTimeString();
-      
-      // Calculate working hours (mock calculation)
-      if (this.checkInTime) {
-        const checkIn = new Date(`01/01/2023 ${this.checkInTime}`);
-        const checkOut = new Date();
-        const diffMs = checkOut.getTime() - checkIn.getTime();
-        this.workingHours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
+    
+    this.attendanceService.checkOut(currentUser.employeeId.toString()).subscribe({
+      next: (response) => {
+        this.loadingService.setLoading(false);
+        if (response.success) {
+          this.notificationService.showSuccess('Check-out Successful', 'You have successfully checked out. Have a great day!');
+          this.checkTodayAttendance();
+        } else {
+          const errorMessage = response.message || 'Failed to check out';
+          this.notificationService.showError('Check-out Failed', errorMessage);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.loadingService.setLoading(false);
+        console.error('Check-out error details:', error);
+        
+        const errorMessage = this.extractErrorMessage(error);
+        this.notificationService.showError('Check-out Not Available', errorMessage);
       }
-    }, 1000);
+    });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    try {
+      // Check for different error response structures
+      if (error.error) {
+        // If error.error is a string
+        if (typeof error.error === 'string') {
+          return error.error;
+        }
+        
+        // If error.error has a message property
+        if (error.error.message) {
+          return error.error.message;
+        }
+        
+        // If error.error has validation errors
+        if (error.error.errors) {
+          const validationErrors = Object.values(error.error.errors).flat();
+          return Array.isArray(validationErrors) ? validationErrors.join(', ') : 'Validation error occurred';
+        }
+        
+        // If error.error has a title or detail (Problem Details format)
+        if (error.error.title) {
+          return error.error.detail || error.error.title;
+        }
+        
+        // If error.error is an object but doesn't match expected structure
+        if (typeof error.error === 'object') {
+          return JSON.stringify(error.error);
+        }
+      }
+      
+      // Fallback to status-based messages
+      switch (error.status) {
+        case 400:
+          return 'Invalid request. Please check your data and try again.';
+        case 401:
+          return 'You are not authorized. Please login again.';
+        case 403:
+          return 'You do not have permission to perform this action.';
+        case 404:
+          return 'The requested resource was not found.';
+        case 500:
+          return 'Server error occurred. Please try again later.';
+        default:
+          return `Request failed with status ${error.status}. Please try again.`;
+      }
+    } catch (parseError) {
+      console.error('Error parsing error response:', parseError);
+      return 'An unexpected error occurred. Please try again.';
+    }
   }
 }

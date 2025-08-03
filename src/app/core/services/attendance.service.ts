@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError, map } from 'rxjs';
 import { CheckInDto, CheckInResponseDto, AttendanceDto, AttendanceListDto } from '../models/attendance.model';
 import { APIResult, PaginatedResult } from '../models/api-result.model';
 import { AttendanceQueryParams } from '../models/query-params.model';
@@ -14,8 +14,17 @@ export class AttendanceService {
   private readonly API_URL = `${environment.apiUrl}/attendance`;
 
   checkIn(checkInDto: CheckInDto): Observable<APIResult<CheckInResponseDto>> {
+    console.log('Sending check-in request to:', `${this.API_URL}/check-in`);
+    console.log('Payload:', checkInDto);
+    
     return this.http.post<APIResult<CheckInResponseDto>>(`${this.API_URL}/check-in`, checkInDto)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Check-in API error:', error);
+          console.error('Error response body:', error.error);
+          return this.handleError(error);
+        })
+      );
   }
 
   getPaginatedAttendance(queryParams: AttendanceQueryParams): Observable<APIResult<PaginatedResult<AttendanceListDto>>> {
@@ -54,8 +63,59 @@ export class AttendanceService {
       .pipe(catchError(this.handleError));
   }
 
-  private handleError(error: any): Observable<never> {
-    console.error('Attendance Service Error:', error);
+  getTodayAttendance(employeeId: string): Observable<APIResult<AttendanceListDto | null>> {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+    const params = new HttpParams()
+      .set('employeeId', employeeId)
+      .set('pageSize', '10')
+      .set('sortBy', 'checkInDate')
+      .set('sortDirection', 'desc')
+      .set('startDate', startOfDay.toISOString())
+      .set('endDate', endOfDay.toISOString());
+
+    return this.http.get<APIResult<PaginatedResult<AttendanceListDto>>>(this.API_URL, { params })
+      .pipe(
+        map(response => {
+          if (response.success && response.data && response.data.items.length > 0) {
+            // Get the most recent attendance record for today
+            const todayAttendance = response.data.items[0];
+            return {
+              ...response,
+              data: todayAttendance
+            };
+          }
+          return {
+            ...response,
+            data: null
+          };
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  checkOut(employeeId: string): Observable<APIResult<any>> {
+    // Since check-out is not implemented, return a proper error
+    return throwError(() => new HttpErrorResponse({
+      error: {
+        message: 'Check-out functionality is not yet implemented in the backend. Please contact your administrator.'
+      },
+      status: 501,
+      statusText: 'Not Implemented'
+    }));
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('Attendance Service Error Details:', {
+      status: error.status,
+      statusText: error.statusText,
+      url: error.url,
+      error: error.error
+    });
+    
+    // Return the original error for proper handling in components
     return throwError(() => error);
   }
 }

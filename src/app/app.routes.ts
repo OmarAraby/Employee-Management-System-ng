@@ -25,7 +25,7 @@ export const routes: Routes = [
     component: AuthLayout,
     canActivate: [authGuard],
     children: [
-      { path: ':id', component: ResetPassword }
+      { path: '', component: ResetPassword }
     ]
   },
   {

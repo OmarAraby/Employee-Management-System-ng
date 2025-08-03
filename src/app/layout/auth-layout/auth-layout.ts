@@ -11,4 +11,5 @@ import { RouterOutlet } from '@angular/router';
 export class AuthLayout {
   // This layout is used for authentication pages (login, reset password)
   // It doesn't include the header or footer
+  
 }

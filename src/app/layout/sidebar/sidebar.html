@@ -8,16 +8,17 @@
       <span>EMS Pro</span>
     </div>
     <div class="user-profile">
-      <div class="avatar">AD</div>
+      <div class="avatar">{{ userInitials }}</div>
       <div class="user-info">
-        <span class="name">Admin User</span>
-        <span class="role">Super Admin</span>
+        <span class="name">{{ userDisplayName }}</span>
+        <span class="role">{{ userRole }}</span>
       </div>
     </div>
   </div>
   
   <nav class="sidebar-nav">
     <ul>
+      <!-- Dashboard - Available for both admin and employee -->
       <li>
         <a routerLink="/dashboard" class="nav-item" routerLinkActive="active">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -27,41 +28,65 @@
           <span>Dashboard</span>
         </a>
       </li>
-      <li>
-        <a routerLink="/admin/employees" class="nav-item" routerLinkActive="active">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.25 6.75A3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clip-rule="evenodd" />
-            <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a11.25 11.25 0 018.756-14.806.75.75 0 01.5.707v.003a.75.75 0 01.572.819l-.506 3.554a.75.75 0 01-.404.585l-1.48.848a8.455 8.455 0 00-1.023.198z" />
-          </svg>
-          <span>Employees</span>
-          <span class="badge">24</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/admin/add-employee" class="nav-item" routerLinkActive="active">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-          </svg>
-          <span>Add Employee</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/admin/attendance" class="nav-item" routerLinkActive="active">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
-          </svg>
-          <span>Attendance</span>
-          <span class="badge warning">3</span>
-        </a>
-      </li>
-      <!-- <li>
-        <a routerLink="/admin/reports" class="nav-item">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm14.25 6a.75.75 0 01-.75.75H7.5a.75.75 0 010-1.5h9a.75.75 0 01.75.75zm0 4a.75.75 0 01-.75.75H7.5a.75.75 0 010-1.5h9a.75.75 0 01.75.75zM6 9.75A.75.75 0 016.75 9h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 016 9.75z" clip-rule="evenodd" />
-          </svg>
-          <span>Reports</span>
-        </a>
-      </li> -->
+
+      <!-- Admin-only navigation items -->
+      <ng-container *ngIf="isAdmin">
+        <li>
+          <a routerLink="/admin/employees" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.25 6.75A3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clip-rule="evenodd" />
+              <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a11.25 11.25 0 018.756-14.806.75.75 0 01.5.707v.003a.75.75 0 01.572.819l-.506 3.554a.75.75 0 01-.404.585l-1.48.848a8.455 8.455 0 00-1.023.198z" />
+            </svg>
+            <span>Employees</span>
+            <span class="badge">24</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/add-employee" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+            </svg>
+            <span>Add Employee</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/attendance" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+            </svg>
+            <span>Attendance Management</span>
+            <span class="badge warning">3</span>
+          </a>
+        </li>
+      </ng-container>
+
+      <!-- Employee-only navigation items -->
+      <ng-container *ngIf="isEmployee">
+        <li>
+          <a routerLink="/employee/profile" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+            </svg>
+            <span>My Profile</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/employee/attendance/check-in" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+            </svg>
+            <span>Check In/Out</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/employee/attendance/list" class="nav-item" routerLinkActive="active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+            </svg>
+            <span>My Attendance</span>
+          </a>
+        </li>
+      </ng-container>
     </ul>
     
     <div class="sidebar-footer">

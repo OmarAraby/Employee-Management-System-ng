@@ -54,11 +54,27 @@ export class ResetPassword implements OnInit {
       return;
     }
 
+    // Get current user to extract employeeId
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.notificationService.showError('Authentication Error', 'User session not found. Please login again.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.loadingService.setLoading(true);
 
-    const { currentPassword, newPassword } = this.resetPasswordForm.value;
+    const { currentPassword, newPassword, confirmPassword } = this.resetPasswordForm.value;
 
-    this.authService.resetPassword({ currentPassword, newPassword, confirmPassword: newPassword }).subscribe({
+    // Create the reset password DTO with all required fields
+    const resetPasswordDto = {
+      employeeId: currentUser.employeeId,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    };
+
+    this.authService.resetPassword(resetPasswordDto).subscribe({
       next: (response) => {
         this.loadingService.setLoading(false);
         if (response.success) {
@@ -70,7 +86,19 @@ export class ResetPassword implements OnInit {
       },
       error: (error) => {
         this.loadingService.setLoading(false);
-        this.notificationService.showError('Reset Failed', 'An error occurred while resetting password');
+        console.error('Reset password error:', error);
+        
+        // Handle specific error messages from the API
+        let errorMessage = 'An error occurred while resetting password';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.error && error.error.errors) {
+          // Handle validation errors
+          const validationErrors = Object.values(error.error.errors).flat();
+          errorMessage = validationErrors.join(', ');
+        }
+        
+        this.notificationService.showError('Reset Failed', errorMessage);
       }
     });
   }
