@@ -26,6 +26,19 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Legacy aliases: the layout/auth/dashboard CSS was authored against an
+     earlier token set that was later renamed. These map the old names to the
+     current scale so those rules resolve instead of silently no-op'ing. */
+  --dark: var(--gray-900);
+  --gray: var(--gray-500);
+  --gray-light: var(--gray-200);
+  --box-shadow: var(--shadow-md);
+  --border-radius: var(--radius-lg);
+
+  /* Layout dimensions referenced by the admin shell (had no definition). */
+  --sidebar-width: 260px;
+  --header-height: 64px;
 }
   
   * {
