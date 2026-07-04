@@ -113,8 +113,7 @@ export class AttendanceService {
 
   /**
    * Checks the current user out. The endpoint derives the employee from the
-   * JWT (no body), so the employeeId param is accepted for call-site
-   * compatibility but not sent.
+   * JWT, so no body or id is sent.
    */
   checkOut(): Observable<APIResult<CheckInResponseDto>> {
     return this.http.post<APIResult<CheckInResponseDto>>(`${this.API_URL}/check-out`, {})
