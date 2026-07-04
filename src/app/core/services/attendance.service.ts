@@ -63,6 +63,21 @@ export class AttendanceService {
       .pipe(catchError(this.handleError));
   }
 
+  /**
+   * Downloads the monthly attendance report CSV for an employee.
+   * Returns the raw Blob; the caller triggers the browser save.
+   */
+  downloadMonthlyReport(employeeId: string, year: number, month: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('year', year.toString())
+      .set('month', month.toString());
+
+    return this.http.get(`${this.API_URL}/monthly/${employeeId}/report`, {
+      params,
+      responseType: 'blob'
+    }).pipe(catchError(this.handleError));
+  }
+
   getTodayAttendance(employeeId: string): Observable<APIResult<AttendanceListDto | null>> {
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());

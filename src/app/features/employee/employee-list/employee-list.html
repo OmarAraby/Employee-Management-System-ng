@@ -239,15 +239,22 @@
                     <i class="fas fa-eye"></i>
                     View
                   </button>
-                  <button 
-                    class="btn btn-sm btn-outline-secondary" 
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
                     (click)="openEditModal(employee)"
                     title="Edit Employee">
                     <i class="fas fa-edit"></i>
                     Edit
                   </button>
-                  <button 
-                    class="btn btn-sm btn-danger" 
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="downloadAttendanceReport(employee)"
+                    title="Download this month's attendance report (CSV)">
+                    <i class="fas fa-file-csv"></i>
+                    Report
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger"
                     (click)="openDeleteModal(employee)"
                     title="Delete Employee">
                     <i class="fas fa-trash"></i>
