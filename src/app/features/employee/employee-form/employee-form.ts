@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CreateEmployeeDto, EmployeeDto, EmployeeStatus } from '../../../core/models/employee.model';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { SignatureService } from '../../../core/services/signature.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,6 +17,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class EmployeeForm {
   private fb = inject(FormBuilder);
   private employeeService = inject(EmployeeService);
+  private signatureService = inject(SignatureService);
   private notificationService = inject(NotificationService);
   private loadingService = inject(LoadingService);
   private router = inject(Router);
@@ -313,9 +315,18 @@ export class EmployeeForm {
       return;
     }
 
-    // Note: You'll need to implement signature upload service
-    console.log('Would upload signature for employee:', employeeId);
-    this.router.navigate(['/admin/employees']);
+    this.signatureService.uploadSignature(employeeId, this.selectedFile).subscribe({
+      next: (response) => {
+        if (!response.success) {
+          this.notificationService.showError('Signature', response.message || 'Failed to upload signature');
+        }
+        this.router.navigate(['/admin/employees']);
+      },
+      error: () => {
+        this.notificationService.showError('Signature', 'Failed to upload the signature');
+        this.router.navigate(['/admin/employees']);
+      }
+    });
   }
 
   cancel(): void {
