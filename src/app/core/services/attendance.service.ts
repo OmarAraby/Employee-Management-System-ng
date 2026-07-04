@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError, map } from 'rxjs';
-import { CheckInDto, CheckInResponseDto, AttendanceDto, AttendanceListDto } from '../models/attendance.model';
+import { CheckInDto, CheckInResponseDto, AttendanceListDto } from '../models/attendance.model';
 import { APIResult, PaginatedResult } from '../models/api-result.model';
 import { AttendanceQueryParams } from '../models/query-params.model';
 import { environment } from '../../../environments/environment';
@@ -111,15 +111,13 @@ export class AttendanceService {
       );
   }
 
-  checkOut(employeeId: string): Observable<APIResult<any>> {
-    // Since check-out is not implemented, return a proper error
-    return throwError(() => new HttpErrorResponse({
-      error: {
-        message: 'Check-out functionality is not yet implemented in the backend. Please contact your administrator.'
-      },
-      status: 501,
-      statusText: 'Not Implemented'
-    }));
+  /**
+   * Checks the current user out. The endpoint derives the employee from the
+   * JWT, so no body or id is sent.
+   */
+  checkOut(): Observable<APIResult<CheckInResponseDto>> {
+    return this.http.post<APIResult<CheckInResponseDto>>(`${this.API_URL}/check-out`, {})
+      .pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
