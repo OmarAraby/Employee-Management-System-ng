@@ -60,10 +60,10 @@ export class EmployeeService {
       .pipe(catchError(this.handleError));
   }
 
-  // getEmployeeStats(): Observable<APIResult<EmployeeStatsDto>> {
-  //   return this.http.get<APIResult<EmployeeStatsDto>>(`${this.API_URL}/stats`)
-  //     .pipe(catchError(this.handleError));
-  // }
+  getEmployeeStats(): Observable<APIResult<EmployeeStatsDto>> {
+    return this.http.get<APIResult<EmployeeStatsDto>>(`${this.API_URL}/statistics`)
+      .pipe(catchError(this.handleError));
+  }
 
   private handleError(error: any): Observable<never> {
     console.error('Employee Service Error:', error);

@@ -1,56 +1,53 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { EmployeeService } from '../../core/services/employee.service';
-import { EmployeeStatsDto } from '../../core/models/employee.model';
-import { LoadingService } from '../../core/services/loading.service';
+import { EmployeeStatsDto, EmployeeListDto } from '../../core/models/employee.model';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
   private employeeService = inject(EmployeeService);
-  private loadingService = inject(LoadingService);
   private notificationService = inject(NotificationService);
 
   stats: EmployeeStatsDto | null = null;
-  recentActivities: any[] = [];
-
-  constructor() {}
+  recentEmployees: EmployeeListDto[] = [];
 
   ngOnInit(): void {
-    // this.loadStats();
-    // Mock data for recent activities
-    this.loadRecentActivities();
+    this.loadStats();
+    this.loadRecentEmployees();
   }
 
-  // loadStats(): void {
-  //   this.employeeService.getEmployeeStats().subscribe({
-  //     next: (response) => {
-  //       if (response.success && response.data) {
-  //         this.stats = response.data;
-  //       } else {
-  //         this.notificationService.showError('Failed to load employee statistics');
-  //       }
-  //     },
-  //     error: (error) => {
-  //       console.error('Error loading stats:', error);
-  //       this.notificationService.showError('Failed to load employee statistics');
-  //     }
-  //   });
-  // }
+  loadStats(): void {
+    this.employeeService.getEmployeeStats().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.stats = response.data;
+        }
+      },
+      error: () => this.notificationService.showError('Error', 'Failed to load employee statistics')
+    });
+  }
 
-  loadRecentActivities(): void {
-    // Mock data for recent activities
-    this.recentActivities = [
-      { id: 1, name: 'John Doe', action: 'checked in', time: '08:45 AM', date: 'Today' },
-      { id: 2, name: 'Alice Smith', action: 'submitted leave request', time: '08:30 AM', date: 'Today' },
-      { id: 3, name: 'Mike Johnson', action: 'updated personal information', time: '05:12 PM', date: 'Yesterday' },
-      { id: 4, name: 'HR Department', action: 'added new policy', time: '03:45 PM', date: 'Yesterday' }
-    ];
+  loadRecentEmployees(): void {
+    this.employeeService.getPaginatedEmployees({ pageNumber: 1, pageSize: 5 }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.recentEmployees = response.data.items;
+        }
+      },
+      error: () => this.notificationService.showError('Error', 'Failed to load recent employees')
+    });
+  }
+
+  getInitials(name: string | undefined | null): string {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
   }
 }
