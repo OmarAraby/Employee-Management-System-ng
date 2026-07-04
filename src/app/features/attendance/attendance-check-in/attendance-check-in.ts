@@ -147,7 +147,7 @@ export class AttendanceCheckIn implements OnInit {
 
     this.loadingService.setLoading(true);
     
-    this.attendanceService.checkOut(currentUser.employeeId.toString()).subscribe({
+    this.attendanceService.checkOut().subscribe({
       next: (response) => {
         this.loadingService.setLoading(false);
         if (response.success) {
