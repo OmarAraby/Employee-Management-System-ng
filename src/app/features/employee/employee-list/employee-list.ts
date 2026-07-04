@@ -7,6 +7,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { EmployeeQueryParams } from '../../../core/models/query-params.model';
 import { LoadingService } from '../../../core/services/loading.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { AttendanceService } from '../../../core/services/attendance.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { EmployeeListDto, EmployeeStatus, EmployeeStatsDto, EmployeeDto } from '../../../core/models/employee.model';
 import { PaginatedResult } from '../../../core/models/api-result.model';
@@ -21,6 +22,7 @@ type ViewMode = 'table' | 'grid';
 })
 export class EmployeeList implements OnInit, OnDestroy {
   private employeeService = inject(EmployeeService);
+  private attendanceService = inject(AttendanceService);
   private notificationService = inject(NotificationService);
   private loadingService = inject(LoadingService);
   private router = inject(Router);
@@ -505,6 +507,29 @@ export class EmployeeList implements OnInit, OnDestroy {
   // Export Methods
   exportEmployees(): void {
     this.exportToCSV(this.employees, 'all-employees');
+  }
+
+  /** Downloads the current month's attendance report CSV for one employee. */
+  downloadAttendanceReport(employee: EmployeeListDto): void {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    this.attendanceService.downloadMonthlyReport(employee.id, year, month)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `attendance-${employee.fullName}-${year}-${String(month).padStart(2, '0')}.csv`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: () => {
+          this.notificationService.showError('Error', 'Failed to download the attendance report');
+        }
+      });
   }
 
   private exportToCSV(data: EmployeeListDto[], filename: string): void {
