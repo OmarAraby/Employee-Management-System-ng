@@ -358,14 +358,14 @@ export class EmployeeList implements OnInit, OnDestroy {
     // Load full employee details for editing
     this.employeeService.getEmployeeProfile(employee.id).subscribe({
       next: (response) => {
-        // if (response.success && response.data) {
-        //   this.editingEmployee = { ...response.data };
-        //   this.originalEmployeeData = { ...response.data };
-        // } else {
-        //   this.notificationService.showError('Error', 'Failed to load employee details');
-        //   this.closeEditModal();
-        // }
-        // this.isLoadingEmployeeDetails = false;
+        if (response.success && response.data) {
+          this.editingEmployee = { ...response.data };
+          this.originalEmployeeData = { ...response.data };
+        } else {
+          this.notificationService.showError('Error', 'Failed to load employee details');
+          this.closeEditModal();
+        }
+        this.isLoadingEmployeeDetails = false;
       },
       error: (error) => {
         console.error('Load employee details error:', error);
