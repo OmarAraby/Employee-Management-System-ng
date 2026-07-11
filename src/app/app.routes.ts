@@ -52,10 +52,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { 
-        path: 'dashboard', 
+      {
+        path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
-        canActivate: [authGuard]
+        canActivate: [authGuard, adminGuard]
       },
       {
         path: 'admin',
@@ -71,7 +71,8 @@ export const routes: Routes = [
         path: 'employee',
         canActivate: [employeeGuard],
         children: [
-          { path: '', redirectTo: 'profile', pathMatch: 'full' },
+          { path: '', redirectTo: 'home', pathMatch: 'full' },
+          { path: 'home', loadComponent: () => import('./features/employee/employee-home/employee-home').then(m => m.EmployeeHome) },
           { path: 'profile', loadComponent: () => import('./features/employee/employee-profile/employee-profile').then(m => m.EmployeeProfile) },
           { 
             path: 'attendance',

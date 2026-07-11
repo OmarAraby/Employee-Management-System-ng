@@ -18,6 +18,8 @@ export const adminGuard: CanActivateFn = (route, state) => {
   }
 
   notificationService.showError('Admin access required.');
-  router.navigate(['/dashboard']);
+  // Non-admins go to the employee home, NOT /dashboard (which is now admin-gated
+  // — redirecting there would loop).
+  router.navigate(['/employee/home']);
   return false;
 };
