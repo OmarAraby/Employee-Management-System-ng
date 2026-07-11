@@ -65,7 +65,13 @@ export class Login implements OnInit {
           if (response.data.requiresPasswordReset) {
             this.router.navigate(['/reset-password']);
           } else {
-            this.router.navigate([this.returnUrl]);
+            // Role-aware landing: an employee should never land on the admin
+            // dashboard. Honour an explicit deep-link returnUrl, but send
+            // employees to their own home when no specific target was requested.
+            const dest = (this.returnUrl === '/dashboard' && response.data.role === 'Employee')
+              ? '/employee/home'
+              : this.returnUrl;
+            this.router.navigate([dest]);
           }
         } else {
           this.notificationService.showError('Login Failed', response.message || 'Invalid credentials');

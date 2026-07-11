@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError, map } from 'rxjs';
-import { CheckInDto, CheckInResponseDto, AttendanceListDto } from '../models/attendance.model';
+import { Observable, catchError, throwError } from 'rxjs';
+import { CheckInDto, CheckInResponseDto, AttendanceListDto, AttendanceDto } from '../models/attendance.model';
 import { APIResult, PaginatedResult } from '../models/api-result.model';
 import { AttendanceQueryParams } from '../models/query-params.model';
 import { environment } from '../../../environments/environment';
@@ -78,37 +78,14 @@ export class AttendanceService {
     }).pipe(catchError(this.handleError));
   }
 
-  getTodayAttendance(employeeId: string): Observable<APIResult<AttendanceListDto | null>> {
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-
-    const params = new HttpParams()
-      .set('employeeId', employeeId)
-      .set('pageSize', '10')
-      .set('sortBy', 'checkInDate')
-      .set('sortDirection', 'desc')
-      .set('startDate', startOfDay.toISOString())
-      .set('endDate', endOfDay.toISOString());
-
-    return this.http.get<APIResult<PaginatedResult<AttendanceListDto>>>(this.API_URL, { params })
-      .pipe(
-        map(response => {
-          if (response.success && response.data && response.data.items.length > 0) {
-            // Get the most recent attendance record for today
-            const todayAttendance = response.data.items[0];
-            return {
-              ...response,
-              data: todayAttendance
-            };
-          }
-          return {
-            ...response,
-            data: null
-          };
-        }),
-        catchError(this.handleError)
-      );
+  /**
+   * The current user's OWN attendance record for today (or null). Uses the
+   * employee-safe GET /attendance/today (identity from the JWT) instead of the
+   * Admin-only paginated list. No id param needed — the server derives it.
+   */
+  getTodayAttendance(): Observable<APIResult<AttendanceDto | null>> {
+    return this.http.get<APIResult<AttendanceDto | null>>(`${this.API_URL}/today`)
+      .pipe(catchError(this.handleError));
   }
 
   /**

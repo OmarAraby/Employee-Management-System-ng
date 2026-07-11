@@ -1,0 +1,70 @@
+<div class="container py-4">
+  <h2 class="mb-1">Welcome, {{ firstName }}</h2>
+  <p class="text-muted mb-4">Here's your day at a glance.</p>
+
+  <!-- Today's attendance status -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Today</h5>
+
+      @if (loading) {
+        <div class="d-flex align-items-center text-muted">
+          <span class="spinner-border spinner-border-sm me-2"></span> Loading your status…
+        </div>
+      } @else if (!today) {
+        <p class="mb-3">You haven't checked in yet today.</p>
+        <a routerLink="/employee/attendance/check-in" class="btn btn-primary">Check in</a>
+      } @else {
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <div class="text-muted small">Checked in</div>
+            <div class="fs-5">{{ today.checkInTime }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Checked out</div>
+            <div class="fs-5">{{ today.checkOutTime ?? '—' }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Status</div>
+            <div class="fs-5">{{ today.statusDisplayName }}</div>
+          </div>
+        </div>
+        <div class="mt-3">
+          @if (!today.checkOutTime) {
+            <a routerLink="/employee/attendance/check-in" class="btn btn-primary">Check out</a>
+          } @else {
+            <span class="badge bg-success">Day complete</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="row g-3">
+    <div class="col-md-4">
+      <a routerLink="/employee/attendance/check-in" class="card shadow-sm h-100 text-decoration-none">
+        <div class="card-body">
+          <h6 class="card-title">Check in / out</h6>
+          <p class="card-text text-muted small mb-0">Record your attendance for today.</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a routerLink="/employee/attendance/list" class="card shadow-sm h-100 text-decoration-none">
+        <div class="card-body">
+          <h6 class="card-title">My Attendance</h6>
+          <p class="card-text text-muted small mb-0">View your attendance history.</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a routerLink="/employee/profile" class="card shadow-sm h-100 text-decoration-none">
+        <div class="card-body">
+          <h6 class="card-title">My Profile</h6>
+          <p class="card-text text-muted small mb-0">View your profile details.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
