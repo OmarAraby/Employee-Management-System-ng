@@ -35,6 +35,19 @@ export interface ResetPasswordResponseDto {
   // user?: LoginResponseDto;
 }
 
+// forgot-password.dto.ts — request a reset link by email
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+// reset-password-with-token.dto.ts — complete a reset via the emailed token
+export interface ResetPasswordWithTokenDto {
+  email: string;
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 // User Model
 export interface User {
   employeeId: string;
