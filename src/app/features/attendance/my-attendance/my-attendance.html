@@ -1,0 +1,59 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">My Attendance</h2>
+    <a routerLink="/employee/attendance/check-in" class="btn btn-outline-primary btn-sm">Check in / out</a>
+  </div>
+
+  <!-- Month / year picker (numbers — no date-string parsing) -->
+  <div class="row g-2 align-items-end mb-3" style="max-width: 420px;">
+    <div class="col">
+      <label class="form-label small mb-1">Month</label>
+      <select class="form-select" [(ngModel)]="month" (change)="load()">
+        <option *ngFor="let m of months" [ngValue]="m.v">{{ m.n }}</option>
+      </select>
+    </div>
+    <div class="col">
+      <label class="form-label small mb-1">Year</label>
+      <select class="form-select" [(ngModel)]="year" (change)="load()">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      @if (loading) {
+        <div class="d-flex align-items-center text-muted">
+          <span class="spinner-border spinner-border-sm me-2"></span> Loading…
+        </div>
+      } @else if (records.length === 0) {
+        <p class="text-muted mb-0">No attendance records for this month.</p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Check-In</th>
+                <th>On Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of records">
+                <td>{{ r.checkInDate | date:'yyyy-MM-dd' }}</td>
+                <td>{{ r.checkInTime }}</td>
+                <td>
+                  <span class="badge" [class.bg-success]="r.isOnTime" [class.bg-warning]="!r.isOnTime">
+                    {{ r.isOnTime ? 'On time' : 'Late' }}
+                  </span>
+                </td>
+                <td>{{ r.statusDisplayName }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
