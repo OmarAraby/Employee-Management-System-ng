@@ -72,10 +72,13 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
-  /** Completes a reset using the email + token from the reset link. */
+  /**
+   * Completes a reset using the email + token from the reset link.
+   * Intentionally does NOT pipe through handleError — the component surfaces
+   * the API's specific message (invalid/expired token vs password-policy).
+   */
   resetPasswordWithToken(dto: ResetPasswordWithTokenDto): Observable<APIResult<boolean>> {
-    return this.http.post<APIResult<boolean>>(`${this.API_URL}/reset-password-confirm`, dto)
-      .pipe(catchError(this.handleError));
+    return this.http.post<APIResult<boolean>>(`${this.API_URL}/reset-password-confirm`, dto);
   }
 
   logout(): void {
