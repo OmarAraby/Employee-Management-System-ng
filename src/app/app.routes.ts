@@ -11,7 +11,6 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { employeeGuard } from './core/guards/employee.guard';
 import { loginGuard } from './core/guards/login.guard';
-import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
