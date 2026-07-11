@@ -6,7 +6,7 @@ export interface LoginDto {
 
 // login-response.dto.ts
 export interface LoginResponseDto {
-  employeeId: number;
+  employeeId: string; // GUID issued by the API (not numeric)
   email: string;
   fullName: string;
   firstName?: string;  // Make optional to maintain backward compatibility
@@ -21,7 +21,7 @@ export interface LoginResponseDto {
 
 // reset-password.dto.ts
 export interface ResetPasswordDto {
-  employeeId?: number;
+  employeeId?: string; // GUID (matches LoginResponseDto.employeeId)
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
