@@ -79,7 +79,7 @@ export const routes: Routes = [
             children: [
               { path: '', redirectTo: 'check-in', pathMatch: 'full' },
               { path: 'check-in', loadComponent: () => import('./features/attendance/attendance-check-in/attendance-check-in').then(m => m.AttendanceCheckIn) },
-              { path: 'list', loadComponent: () => import('./features/attendance/attendance-list/attendance-list').then(m => m.AttendanceList) }
+              { path: 'list', loadComponent: () => import('./features/attendance/my-attendance/my-attendance').then(m => m.MyAttendance) }
             ]
           }
         ]
