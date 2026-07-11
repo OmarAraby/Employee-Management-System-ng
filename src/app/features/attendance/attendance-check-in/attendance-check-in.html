@@ -80,6 +80,9 @@
                 </button>
               </div>
               <div class="action-note">
+                <p class="text-muted small" *ngIf="checkInWindow">
+                  <strong>Check-in window:</strong> {{ checkInWindow.start }}–{{ checkInWindow.end }} (Egypt time).
+                </p>
                 <p *ngIf="!hasCheckedInToday">
                   You haven't checked in today. Click the Check In button to record your attendance.
                 </p>

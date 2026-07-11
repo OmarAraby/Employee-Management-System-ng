@@ -88,6 +88,12 @@ export class AttendanceService {
       .pipe(catchError(this.handleError));
   }
 
+  /** The allowed check-in window (HH:mm), so the UI can display the rule. */
+  getCheckInWindow(): Observable<APIResult<{ start: string; end: string }>> {
+    return this.http.get<APIResult<{ start: string; end: string }>>(`${this.API_URL}/check-in-window`)
+      .pipe(catchError(this.handleError));
+  }
+
   /**
    * Checks the current user out. The endpoint derives the employee from the
    * JWT, so no body or id is sent.
