@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AttendanceService } from '../../../core/services/attendance.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -10,11 +11,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-attendance-check-in',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './attendance-check-in.html',
   styleUrl: './attendance-check-in.css'
 })
-export class AttendanceCheckIn implements OnInit {
+export class AttendanceCheckIn implements OnInit, OnDestroy {
   private attendanceService = inject(AttendanceService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
@@ -27,14 +28,27 @@ export class AttendanceCheckIn implements OnInit {
   checkOutTime: string | null = null;
   workingHours: number | null = null;
   attendanceStatus: string | null = null;
+  checkInWindow: { start: string; end: string } | null = null;
+
+  private clockIntervalId?: ReturnType<typeof setInterval>;
 
   constructor() {
     this.updateCurrentTime();
-    setInterval(() => this.updateCurrentTime(), 1000);
+    this.clockIntervalId = setInterval(() => this.updateCurrentTime(), 1000);
   }
 
   ngOnInit(): void {
     this.checkTodayAttendance();
+    this.attendanceService.getCheckInWindow().subscribe({
+      next: (res) => { if (res.success && res.data) this.checkInWindow = res.data; },
+      error: () => { /* window display is best-effort; ignore */ }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockIntervalId) {
+      clearInterval(this.clockIntervalId);
+    }
   }
 
   private updateCurrentTime(): void {
@@ -64,8 +78,8 @@ export class AttendanceCheckIn implements OnInit {
           const attendance = response.data;
           this.hasCheckedInToday = !!attendance.checkInTime;
           this.checkInTime = attendance.checkInTime || null;
-          this.checkOutTime = null;
-          this.workingHours = null;
+          this.checkOutTime = attendance.checkOutTime || null;
+          this.workingHours = attendance.workingHours ?? null;
           this.attendanceStatus = attendance.statusDisplayName || 'Present';
         } else {
           this.resetAttendanceState();
