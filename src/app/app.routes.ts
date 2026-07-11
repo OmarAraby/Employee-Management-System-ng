@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { ResetPassword } from './features/auth/reset-password/reset-password';
+import { ForgotPassword } from './features/auth/forgot-password/forgot-password';
+import { ResetPasswordConfirm } from './features/auth/reset-password-confirm/reset-password-confirm';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { AuthLayout } from './layout/auth-layout/auth-layout';
 import { EmployeeList } from './features/employee/employee-list/employee-list';
@@ -26,6 +28,22 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', component: ResetPassword }
+    ]
+  },
+  {
+    // Self-service: request a reset link. Anonymous — the user is logged out.
+    path: 'forgot-password',
+    component: AuthLayout,
+    children: [
+      { path: '', component: ForgotPassword }
+    ]
+  },
+  {
+    // Self-service: complete the reset via the emailed email+token link. Anonymous.
+    path: 'reset-password-confirm',
+    component: AuthLayout,
+    children: [
+      { path: '', component: ResetPasswordConfirm }
     ]
   },
   {

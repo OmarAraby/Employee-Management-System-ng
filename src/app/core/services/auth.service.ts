@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { LoginDto, LoginResponseDto, ResetPasswordDto, ResetPasswordResponseDto } from '../models/auth.model';
+import { LoginDto, LoginResponseDto, ResetPasswordDto, ResetPasswordResponseDto, ForgotPasswordDto, ResetPasswordWithTokenDto } from '../models/auth.model';
 import { APIResult } from '../models/api-result.model';
 import { environment } from '../../../environments/environment';
 
@@ -64,6 +64,21 @@ export class AuthService {
       .pipe(
         catchError(this.handleError)
       );
+  }
+
+  /** Requests a password-reset link by email (enumeration-safe: always succeeds). */
+  forgotPassword(dto: ForgotPasswordDto): Observable<APIResult<boolean>> {
+    return this.http.post<APIResult<boolean>>(`${this.API_URL}/forgot-password`, dto)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Completes a reset using the email + token from the reset link.
+   * Intentionally does NOT pipe through handleError — the component surfaces
+   * the API's specific message (invalid/expired token vs password-policy).
+   */
+  resetPasswordWithToken(dto: ResetPasswordWithTokenDto): Observable<APIResult<boolean>> {
+    return this.http.post<APIResult<boolean>>(`${this.API_URL}/reset-password-confirm`, dto);
   }
 
   logout(): void {
